@@ -3,8 +3,7 @@
 
 // Objects
 #include "object.hpp"
-#include "dog.hpp"
-#include "room.hpp"
+#include "boundingbox.hpp"
 
 #include "matrixstack.hpp"
 #include "shader.hpp"
@@ -21,31 +20,21 @@ public:
   void initShaderVars(void);
   void render(void);
 
-  inline Dog* getDog(void)                { return dog; }
-  inline Light* getLight(void)            { return light; }
-  inline TrackballCamera* getCamera(void) { return camera; }
-  inline Room* getRoom(void)              { return room; }
-
-  inline int* isUsingToonShading() { return &in_toon_mode; }
-
-  inline static void onChangeDogShading(int ignore) {
-    
-  }
+  inline Light* getLight(void)              { return light; }
+  inline TrackballCamera* getCamera(void)   { return camera; }
+  inline BoundingBox* getBoundingBox(void) { return room; }
 
 private:
   // Objects
-  Dog* dog;
-  Room* room;
+  BoundingBox* bounding_box;
   
   // Camera
   TrackballCamera* camera;
   Light* light;
 
   // Buffer
+  Buffer* bounding_box_buffer;
   GLuint width, height;
-
-  // State
-  int in_toon_mode;
 };
 
 #endif

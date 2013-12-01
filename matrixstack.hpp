@@ -97,6 +97,11 @@ public:
     *current_matrix *= glm::perspective(fov, aspect, near, far);
   }
 
+  inline static void ortho(GLint width, GLint height)
+  {
+    *current_matrix = glm::ortho(0, width, height, 0);
+  }
+
   inline static void lookAt(GLfloat eyex, GLfloat eyey, GLfloat eyez, GLfloat lookx, GLfloat looky, GLfloat lookz, GLfloat upx, GLfloat upy, GLfloat upz)
   {
     *current_matrix = glm::lookAt(Vector3(eyex, eyey, eyez), 

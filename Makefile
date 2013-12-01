@@ -1,4 +1,4 @@
-SOURCE = tga.cpp shader.cpp light.cpp texture.cpp buffer.cpp matrixstack.cpp room.cpp trackball.cpp object.cpp dog.cpp scene.cpp main.cpp
+SOURCE = tga.cpp shader.cpp light.cpp texture.cpp buffer.cpp matrixstack.cpp boudingbox.cpp trackball.cpp object.cpp scene.cpp main.cpp
 OBJECTS = $(SOURCE:.cpp=.o)
 EXE = output
 CC = g++

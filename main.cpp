@@ -1,6 +1,6 @@
 /**
  * Samuel Sweet
- * CS 5610-1 Assignment 4
+ * CS 5610-1 Project
  *
  * The main program. Handles user interactions
  * as appropriate.
@@ -34,7 +34,6 @@ GLUI* glui;
 GLUI_Rollout* shadow_choice_rollout;
 GLUI_Rollout* light_position_rollout;
 GLUI_Panel* light_transform_panel;
-GLUI_RadioGroup* shadow_choice_radio_group;
 GLUI_Translation* light_xz_trans;
 GLUI_Translation* light_y_trans;
 int main_window;
@@ -61,7 +60,7 @@ void display()
   ShaderSystem::useCurrentShader();
 
   /* Clear depth and color buffers to prevent dirty writing */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
   // Start working in world space.
   glMatrixMode(GL_MODELVIEW); 
@@ -97,29 +96,50 @@ void onWindowResize(int w, int h)
   glMatrixMode(GL_PROJECTION); MatrixStack::matrixMode(MatrixStack::PROJECTION);
   glLoadIdentity(); MatrixStack::loadIdentity();
 
-  gluPerspective(45.0f, (float)w/(float)h, 0.001f, 500.0f);
-  MatrixStack::perspective(45.0f, (float)w/(float)h, 0.001f, 500.0f);
+  // We are rendering just two triangles, so no fancy projection.
+  glOrtho(0, w, h, 0, -1, 1);
+  MatrixStack::ortho(w, h);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
 
   MatrixStack::matrixMode(MatrixStack::VIEW);
   MatrixStack::loadIdentity();
 
   MatrixStack::matrixMode(MatrixStack::WORLD);
+  MatrixStack::loadIdentity();
 
   glutPostRedisplay();
 }
 
+void onWindowPerspResize(int w, int h)
+{
+  int tx, ty = 0;
+  GLUI_Master.get_viewport_area(&tx, &ty, &w, &h);
+
+  glViewport(0, 0, w, h);
+  glMatrixMode(GL_PROJECTION); MatrixStack::matrixMode(MatrixStack::PROJECTION);
+  glLoadIdentity(); MatrixStack::loadIdentity();
+
+  // We are rendering just two triangles, so no fancy projection.
+  gluPerspective(45.0f, (GLfloat)w/(GLfloat)h, 0.01f, 400.0f);
+  MatrixStack::perspective(45.0f, (GLfloat)w/(GLfloat)h, 0.01f, 400.0f);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  MatrixStack::matrixMode(MatrixStack::VIEW);
+  MatrixStack::loadIdentity();
+
+  MatrixStack::matrixMode(MatrixStack::WORLD);
+  MatrixStack::loadIdentity();
+
+  glutPostRedisplay();
+}
 
 // Drives all animations.
 void update(void)
 {
-  scene->getDog()->updateAnim();
-
   // Bind to window context.
   if(glutGetWindow() != main_window)
     glutSetWindow(main_window);
@@ -149,39 +169,6 @@ void onKeyDown(unsigned char key, int x, int y)
     {
     case 27:
       exit(0);
-      break;
-
-    case 'K':
-    case 'k':
-      scene->getDog()->rotateLeft();
-      break;
-
-    case 'L':
-    case 'l':
-      scene->getDog()->rotateRight();
-      break;
-
-    case 'f':
-    case 'F':
-      scene->getDog()->speedUp();
-      break;
-
-    case 's':
-    case 'S':
-      scene->getDog()->slowDown();
-      break;
-
-    case 'r':
-    case 'R':
-      scene->getDog()->resetPosition();
-      break;
-
-    case 'Q':
-    case 'q':
-    case 'W':
-    case 'w':
-      toggleShading(key);
-      break;
     }
 
   glui->sync_live(); 
@@ -194,23 +181,6 @@ void onClose(void)
   delete scene;
 }
 
-// Changes the shading method.
-void toggleShading(unsigned char which)
-{
-  switch(which)
-    {
-    case 'Q':
-    case 'q':
-      glShadeModel(GL_FLAT);
-      break;
-
-    case 'W':
-    case 'w':
-      glShadeModel(GL_SMOOTH);
-      break;
-    }
-}
-
 void initInterface() 
 {
   // Create interface
@@ -218,22 +188,6 @@ void initInterface()
 
   // Quit
   glui->add_button("Quit", 0, (GLUI_Update_CB)exit);
-
-  // Shading selection
-  shadow_choice_rollout = glui->add_rollout("Dog Shading");
-  shadow_choice_radio_group = glui->add_radiogroup_to_panel(shadow_choice_rollout, scene->isUsingToonShading(), -1, &Scene::onChangeDogShading);
-  glui->add_radiobutton_to_group(shadow_choice_radio_group, "Phong");
-  glui->add_radiobutton_to_group(shadow_choice_radio_group, "Toon");
-
-  // Light positioner
-  light_position_rollout = glui->add_rollout("Light Position");
-  light_transform_panel = glui->add_panel_to_panel(light_position_rollout, "", GLUI_PANEL_NONE);
-  glui->add_column_to_panel(light_transform_panel, false);
-  light_xz_trans = glui->add_translation_to_panel(light_transform_panel, "Light XZ",
-						  GLUI_TRANSLATION_XY, scene->getLight()->xzRef());
-  light_y_trans = glui->add_translation_to_panel(light_transform_panel, "Light Y", 
-						 GLUI_TRANSLATION_Y, scene->getLight()->yRef());
-    
 
   // Bind interface to window
   glui->set_main_gfx_window(main_window);
@@ -246,9 +200,9 @@ int main(int argc, char **argv)
 
   // Init GLUT with GLUI
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL | GLUT_MULTISAMPLE);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
   glutInitWindowSize(768, 512);
-  main_window = glutCreateWindow("Dog");
+  main_window = glutCreateWindow("VolRay");
   GLUI_Master.set_glutReshapeFunc(onWindowResize);
   GLUI_Master.set_glutKeyboardFunc(onKeyDown);
   glutDisplayFunc(display);
@@ -261,7 +215,7 @@ int main(int argc, char **argv)
 
   // Load shader programs and our texture.
   shaderSystem = ShaderSystem::getInstance();
-  shaderSystem->initShader("phong_bumpmapping_floor.vs", "phong_bumpmapping_floor.fs", ShaderSystem::PHONG_BUMP_FLOOR);
+  shaderSystem->initShader("passthrough.vs", "passthrough.fs", ShaderSystem::PASSTHROUGH);
 
   // Scene
   scene = new Scene(768, 512);
@@ -269,16 +223,15 @@ int main(int argc, char **argv)
 
   // Enable specific capabilities
   glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
+  glDepthFunc(GL_GREATER);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glEnable(GL_NORMALIZE);
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_CULL_FACE);
-  glEnable(GL_LINE_SMOOTH);
   glShadeModel(GL_SMOOTH);
    
   // "Background"
-  glClearColor(0.5, 0.5, 0.5, 1.0);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   
   // UI
   initInterface();

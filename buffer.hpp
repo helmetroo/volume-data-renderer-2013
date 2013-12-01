@@ -35,13 +35,13 @@ public:
   void setFilter(BufferFiltering filter);
   void setWrapping(void);
   void setComparison(void);
-  void createBufferTexture(void);
+  void createBufferTexture(bool with_alpha);
   void createBuffer(void);
 
   void bind(void);
   void unbind(void);
 
-  void bindBufferTexture(void);
+  void bindBufferTexture(const char* name);
   void unbindBufferTexture(void);
 
   void clearDepth(void);
@@ -52,6 +52,8 @@ private:
   BufferType which_to_use;
   int width;
   int height;
+
+  static int texture_unit = 0;
 
   GLuint texture_ptr;
   GLuint buffer_ptr;

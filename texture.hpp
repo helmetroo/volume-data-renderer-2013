@@ -30,6 +30,7 @@ public:
   virtual ~Texture() {}
 
   void createTexture(bool mipmapped);
+  virtual void initTexture(void);
 
   inline void enable(void) {
     glEnable(GL_TEXTURE_2D);
@@ -101,34 +102,16 @@ private:
   int image_width, image_height;
 };
 
-/* Represents a normal texture (coming from an image texture, which
-  it depends on), needs plane normal, so we can apply rotation matrix */
-class BumpMapTexture
+class VolumeTexture : public Texture
 {
 public:
-  BumpMapTexture(ImageTexture* a_normal_image, 
-		 ImageTexture* a_color_image = NULL) : normal_image(a_normal_image),
-						       color_image(a_color_image) {}
-
-  ~BumpMapTexture()
-  {
-    delete normal_image;
-    delete color_image;
-  }
-
-  inline void enableColor(void)  {  color_image->enable();  }
-  inline void disableColor(void) {  color_image->disable();  }
-  inline void beginRenderColor(char* name) { color_image->beginRender(name); }
-
-  inline void enableNormal(void)  {  normal_image->enable();  }
-  inline void disableNormal(void) {  normal_image->disable();  }
-  inline void beginRenderNormal(char* name) { normal_image->beginRender(name); }
-
-  inline void coordinate(GLfloat s, GLfloat t) { normal_image->coordinate(s, t); }
+  VolumeTexture() : Texture() {}
 
 private:
-  ImageTexture* normal_image;
-  ImageTexture* color_image;
+  virtual void buildMipmaps(void);
+  virtual void passToGpu(void);
+  virtual void freeImage(void);
+  int image_width, image_height, image_depth;
 };
 
 #endif

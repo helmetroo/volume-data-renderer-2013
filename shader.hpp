@@ -33,7 +33,8 @@ class ShaderSystem
  public:
   // Constants for each program used
   enum ShaderProgramNames {
-    PHONG             = 0
+    PASSTHROUGH = 0,
+    RAYCASTING  = 1
   };
 
   inline static ShaderSystem* getInstance(void)

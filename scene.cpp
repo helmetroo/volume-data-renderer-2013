@@ -14,23 +14,27 @@ void Scene::initObjects(void)
   camera = new TrackballCamera(0, 0, 45, 0, 0, -1);
 
   // Init objects
-  dog = new Dog;
-  room = new Room;
+  bounding_box = new BoundingBox;
   light = new Light((GLfloat)1.0f, (GLfloat)10.0f, (GLfloat)0.0f, (GLfloat)0.0f);
+
+  bounding_box_buffer = new Buffer(Buffer::FRAME, width, height);
+  
+  // Prep buffer texture
+  bounding_box_buffer->prepBufferTexture();
+  bounding_box_buffer->setWrapping();
+  bounding_box_buffer->setFilter(Buffer::BufferFiltering::LINEAR);
+  bounding_box_buffer->createBufferTexture();
+
+  bounding_box_buffer->prepBuffer();
+  bounding_box_buffer->createBuffer();
 }
 
 Scene::~Scene()
 {
   delete camera;
-  delete dog;
-  delete room;
+  delete bounding_box_buffer;
+  delete bounding_box;
   delete light;
-}
-
-void Scene::initShaderVars(void)
-{
-  // Use shader that the system is currently set to
-  onChangeDogShading(-1);
 }
 
 void Scene::render(void)
@@ -41,39 +45,23 @@ void Scene::render(void)
 
   MatrixStack::matrixMode(MatrixStack::WORLD);
   
-  // Bind light position
+  // Bind light position (may not need for now)
   light->bindLightColor();
   light->bindLightPos();
 
-  // Room normally
-  glDisable(GL_CULL_FACE);
-  room->draw();
+  // First draw front faces (to COL/TMP)
+  ShaderSystem::useShader(ShaderSystem::PASSTHROUGH);
+  bounding_box_buffer->bind();
+  glCullFace(GL_FRONT);
+  bounding_box->draw();
+  bounding_box_buffer->unbind();
 
-  if(in_toon_mode)
-    { 
-      ShaderSystem::useShader(ShaderSystem::TOON_SILHOUETTE);
-      glEnable(GL_CULL_FACE);
-      glColor3f(0.0f, 0.0f, 0.0f);
-      glLineWidth(1.5f);
-      glPolygonMode(GL_BACK, GL_LINE);
-      glCullFace(GL_FRONT);
-      glDepthFunc(GL_LESS);
-      dog->draw();
+  // Then render back faces so we can calculate direction
+  // capture renders to texture
+  glCullFace(GL_BACK);
+  bounding_box->draw();
 
-      // Then draw dog normally with toon shading
-      ShaderSystem::useShader(ShaderSystem::TOON);
-      glLineWidth(1.0f);
-      glPolygonMode(GL_BACK, GL_FILL);
-      glCullFace(GL_BACK);
-      glDepthFunc(GL_LEQUAL);
-      dog->draw();
-
-      glDisable(GL_BLEND);
-      glDisable(GL_CULL_FACE);
-    } 
-  else
-    {
-      ShaderSystem::useShader(ShaderSystem::PHONG);
-      dog->draw();
-    }
+  // Here subtract backface colors from frontface colors
+  // which gives ray direction, which we do in the shader
+  ShaderSystem::useShader(ShaderSystem::RAYCASTING);
 }
