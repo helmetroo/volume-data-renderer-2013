@@ -34,7 +34,8 @@ class ShaderSystem
   // Constants for each program used
   enum ShaderProgramNames {
     PASSTHROUGH = 0,
-    RAYCASTING  = 1
+    RAYCASTING  = 1,
+    OUTPUT      = 2
   };
 
   inline static ShaderSystem* getInstance(void)

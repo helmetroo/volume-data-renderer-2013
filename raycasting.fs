@@ -7,28 +7,32 @@
 
 #version 120
 
-#define MAX_SAMPLES 256
+#define MAX_MARCHES 256
 
 uniform sampler2D frontBoundingVol;
 uniform sampler2D backBoundingVol;
 
 uniform sampler3D volumeTexture;
 
+varying vec2 bufferTexCoords;
+varying vec3 boxTexCoords;
+
 void main()
 {
   const float stepSize = 0.1;
 
   // Calculate ray direction (back to front).
-  vec3 origin = texture2D(frontBoundingVol, bufferTexCoords).rgb;
+  vec3 origin = boxTexCoords;
   vec4 exitPoint = texture2D(backBoundingVol, bufferTexCoords);
-
+  
   vec3 rayDirec = exitPoint.rgb - origin;
   rayDirec = normalize(rayDirec);
-  vec3 rayDelta = delta * rayDirec;
+  vec3 rayDelta = stepSize * rayDirec;
 
   // Begin ray at origin
   vec3 ray = origin;
 
+  // Begin marching
   vec4 final_color = vec4(0.0);
   float final_alpha = 0.0;
   for(int i = 0; i < MAX_MARCHES; ++i)

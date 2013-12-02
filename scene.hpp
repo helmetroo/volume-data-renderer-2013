@@ -2,8 +2,8 @@
 #define SCENE_H
 
 // Objects
-#include "object.hpp"
 #include "boundingbox.hpp"
+#include "fullquad.hpp"
 
 #include "matrixstack.hpp"
 #include "shader.hpp"
@@ -18,11 +18,15 @@ public:
 
   void initObjects(void);
   void initShaderVars(void);
-  void render(void);
+  void renderBoundingBox(void);
+  void raycast(void);
+  void outputFinalImage(void);
+
+  inline GLuint getWidth(void) { return width; } 
+  inline GLuint getHeight(void) { return height; }
 
   inline Light* getLight(void)              { return light; }
   inline TrackballCamera* getCamera(void)   { return camera; }
-  inline BoundingBox* getBoundingBox(void) { return room; }
 
 private:
   // Objects
@@ -32,9 +36,16 @@ private:
   TrackballCamera* camera;
   Light* light;
 
+  // Volume
+  VolumeTexture* volume;
+
   // Buffer
   Buffer* bounding_box_buffer;
+  Buffer* output_image_buffer;
   GLuint width, height;
+
+  // Full-screen quad
+FullQuad* full_quad;
 };
 
 #endif

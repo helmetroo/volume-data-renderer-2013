@@ -23,7 +23,7 @@ typedef glm::mat4 Matrix4;
 typedef glm::vec4 Vector4;
 
 #define NUM_FACES 6
-class BoundingBox : public Object
+class BoundingBox
 {
 public:
   enum Face

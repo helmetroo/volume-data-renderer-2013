@@ -8,11 +8,12 @@
 #version 120
 
 varying vec2 bufferTexCoords;
+varying vec3 boxTexCoords;
 
 void main()
 {
   bufferTexCoords = vec2(gl_MultiTexCoord0);
+  boxTexCoords = vec2(gl_MultiTexCoord6);
 
-  // No transforms necessary since the vert is in clip space.
-  gl_Position = gl_Vertex;
+  gl_Position = ftransform();
 }

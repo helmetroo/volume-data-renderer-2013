@@ -53,7 +53,7 @@ private:
   int width;
   int height;
 
-  static int texture_unit = 0;
+  static int texture_unit = -1;
 
   GLuint texture_ptr;
   GLuint buffer_ptr;

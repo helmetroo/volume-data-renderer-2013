@@ -14,20 +14,15 @@ Texture::Texture()
 void Texture::createTexture(bool mipmapped)
 {
   enable();
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_2D, textureID);
+  createOnGpu();
   
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  setWrapping();
 
   if(!mipmapped) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    setFilter();
   } else {
     buildMipmaps();
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    setFilterWithMipmap();
   }
 
   passToGpu();
@@ -36,85 +31,11 @@ void Texture::createTexture(bool mipmapped)
   freeImage();
 }
 
-void ImageTexture::buildMipmaps(void)
-{
-  gluBuild2DMipmaps(GL_TEXTURE_2D, image->components, image->width, image->height, image->components, GL_UNSIGNED_BYTE, image->pixels);
-}
-
-void ImageTexture::passToGpu(void)
-{
-  glTexImage2D(GL_TEXTURE_2D, 0, image->components, image->width, image->height, 0, image->format, GL_UNSIGNED_BYTE, image->pixels);
-}
-
-void ImageTexture::freeImage(void)
-{
-  // Allocated C-style, so...
-  free(image);
-}
-
-void ProceduralTexture::buildMipmaps(void)
-{
-  gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, this->image_width, this->image_height, GL_RGBA, GL_UNSIGNED_BYTE, image);
-}
-
-void ProceduralTexture::passToGpu(void)
-{
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->image_width, this->image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-}
-
-void ProceduralTexture::freeImage(void)
-{
-  // Allocated C++ style, so...
-  delete[] image;
-}
-
-void ImageTexture::readFromFile(const char* file_name)
-{
-  FILE* image_file = openImageFile(file_name);
-  readImageFile(image_file, file_name, &image); 
-}
-
-FILE* ImageTexture::openImageFile(const char* file_name)
-{
-  FILE* file = fopen(file_name, "rb");
-
-  if(file == NULL)
-    {
-      printf("Oops! Could not open %s\n", file_name);
-      exit(1);
-    }
-
-  return file;
-}
-
-void ImageTexture::readImageFile(FILE* file, const char* file_name, gliGenericImage** dest)
-{
-  *dest = gliReadTGA(file, const_cast<char*>(file_name));
-  fclose(file);
-}
-
-void ProceduralTexture::createCheckerboard(int width, int height, int square_size)
-{
-  this->image_width = width;
-  this->image_height = height;
-
-  const int size = width*height*4;
-  image = new GLubyte[size];
-
-  GLubyte toggle = 0;
-  for(int x = 0; x < size; x += 4)
-    {
-      int h = x / height;
-      GLubyte current_color = ((x & square_size) ^ (h & square_size)) * 255;
-      image[x] = image[x+1] = image[x+2] = current_color;
-      image[x+3] = 255;
-    }
-}
 
 void Texture::beginRender(char* texture_name)
 {
   enable();
-  glBindTexture(GL_TEXTURE_2D, textureID);
+  bind();
 
   glUniform1i(ShaderSystem::getUniformFromCurrentShader(texture_name), textureUnit);
 }
@@ -157,4 +78,118 @@ void Texture::transform(void)
   glScalef(sc_x, sc_y, sc_z); MatrixStack::scale(sc_x, sc_y, sc_z);
 
   glMatrixMode(GL_MODELVIEW); MatrixStack::matrixMode(MatrixStack::WORLD);
+}
+
+void ImageTexture::bind(void)
+{
+  glBindTexture(GL_TEXTURE_2D, textureID);
+}
+
+void ImageTexture::createOnGpu(void)
+{
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
+}
+
+void ImageTexture::setWrapping(void)
+{
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+}
+
+void ImageTexture::setFilter(void)
+{
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void ImageTexture::setFilterWithMipmap(void)
+{
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+}
+
+void ImageTexture::buildMipmaps(void)
+{
+  gluBuild2DMipmaps(GL_TEXTURE_2D, image->components, image->width, image->height, image->components, GL_UNSIGNED_BYTE, image->pixels);
+}
+
+void ImageTexture::passToGpu(void)
+{
+  glTexImage2D(GL_TEXTURE_2D, 0, image->components, image->width, image->height, 0, image->format, GL_UNSIGNED_BYTE, image->pixels);
+}
+
+void ImageTexture::freeImage(void)
+{
+  free(image);
+}
+
+void ImageTexture::readFromFile(const char* file_name)
+{
+  FILE* image_file = openImageFile(file_name);
+  readImageFile(image_file, file_name, &image); 
+}
+
+FILE* ImageTexture::openImageFile(const char* file_name)
+{
+  FILE* file = fopen(file_name, "rb");
+
+  if(file == NULL)
+    {
+      printf("Oops! Could not open %s\n", file_name);
+      exit(1);
+    }
+
+  return file;
+}
+
+void ImageTexture::readImageFile(FILE* file, const char* file_name, gliGenericImage** dest)
+{
+  *dest = gliReadTGA(file, const_cast<char*>(file_name));
+  fclose(file);
+}
+
+
+/* Volume texture methods */
+void VolumeTexture::bind(void)
+{
+  glBindTexture(GL_TEXTURE_2D, textureID);
+}
+
+void VolumeTexture::createOnGpu(void)
+{
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_3D, textureID);
+}
+
+void VolumeTexture::setWrapping(void)
+{
+  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+}
+
+void VolumeTexture::setFilter(void)
+{
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void VolumeTexture::setFilterWithMipmap(void)
+{
+}
+
+void VolumeTexture::buildMipmaps(void)
+{
+
+}
+
+void VolumeTexture::passToGpu(void)
+{
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, image_width, image_height, image_depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+}
+
+void VolumeTexture::freeImage(void)
+{
+  delete[] image;
 }

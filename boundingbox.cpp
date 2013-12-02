@@ -59,6 +59,10 @@ void BoundingBox::renderPlane(int vert, int face_index)
       glVertex3f(vertices[current_index*3], 
 		 vertices[(current_index*3)+1], 
 		 vertices[(current_index*3)+2]);
+
+      glMultiTexCoord3f(GL_TEXTURE6, vertices[current_index*3], 
+			vertices[(current_index*3)+1], 
+			vertices[(current_index*3)+2]);
 	  
       glNormal3f(normals[face_index*3], 
 		 normals[(face_index*3)+1], 

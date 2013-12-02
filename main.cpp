@@ -38,6 +38,9 @@ GLUI_Translation* light_xz_trans;
 GLUI_Translation* light_y_trans;
 int main_window;
 
+// Shader system
+ShaderSystem* shaderSystem;
+
 // Display / animation callbacks
 void display();
 void update(void);
@@ -50,9 +53,6 @@ void onMouseMove(int x, int y);
 
 // Interactivity for controlling camera and shading type
 void toggleShading(unsigned char which);
-
-// Shader system
-ShaderSystem* shaderSystem;
 
 void display()
 {
@@ -75,6 +75,10 @@ void display()
 
   // Draw elements.
   scene->render();
+  scene->raycast();
+
+  onWindowResize(scene->getWidth(), scene->getHeight());
+  scene->outputFinalImage();
   
   // Bind transformation / projection matrices.
   MatrixStack::bindWorldMatrix();
@@ -203,7 +207,7 @@ int main(int argc, char **argv)
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
   glutInitWindowSize(768, 512);
   main_window = glutCreateWindow("VolRay");
-  GLUI_Master.set_glutReshapeFunc(onWindowResize);
+  GLUI_Master.set_glutReshapeFunc(onWindowPerspResize);
   GLUI_Master.set_glutKeyboardFunc(onKeyDown);
   glutDisplayFunc(display);
   atexit(onClose);
@@ -216,6 +220,8 @@ int main(int argc, char **argv)
   // Load shader programs and our texture.
   shaderSystem = ShaderSystem::getInstance();
   shaderSystem->initShader("passthrough.vs", "passthrough.fs", ShaderSystem::PASSTHROUGH);
+  shaderSystem->initShader("raycasting.vs", "raycasting.fs", ShaderSystem::RAYCASTING);
+  shaderSystem->initShader("fullscrtexture.vs", "fullscrtexture.fs", ShaderSystem::OUTPUT);
 
   // Scene
   scene = new Scene(768, 512);

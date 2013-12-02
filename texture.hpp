@@ -29,8 +29,8 @@ public:
   Texture();
   virtual ~Texture() {}
 
+  virtual void readFromFile(const char* file_name);
   void createTexture(bool mipmapped);
-  virtual void initTexture(void);
 
   inline void enable(void) {
     glEnable(GL_TEXTURE_2D);
@@ -59,9 +59,15 @@ protected:
   virtual void buildMipmaps(void) = 0;
   virtual void passToGpu(void) = 0;
   virtual void freeImage(void) = 0;
+   
+  virtual void createOnGpu(void) = 0;
+  virtual void setWrapping(void) = 0;
+  virtual void setFilter(void) = 0;
+
+  virtual void bind(void) = 0;
 
   GLuint textureID;
-  static GLint textureUnit;
+  static GLint textureUnit = 2;
 
   float rot_angle, rot_axis_x, rot_axis_y, rot_axis_z;
   float sc_x, sc_y, sc_z;
@@ -73,12 +79,17 @@ class ImageTexture : public Texture
 {
 public:
   ImageTexture() : Texture() {}
-  void readFromFile(const char* file_name);
 
 protected:
   virtual void buildMipmaps(void);
   virtual void passToGpu(void);
   virtual void freeImage(void);
+
+  virtual void createOnGpu(void);
+  virtual void setWrapping(void);
+  virtual void setFilter(void);
+
+  virtual void bind(void);
 
   FILE* openImageFile(const char* name);
   void readImageFile(FILE* file, const char* name, gliGenericImage** dest);
@@ -86,22 +97,7 @@ protected:
   gliGenericImage* image;
 };
 
-/* Represents a normal texture and respective */
-class ProceduralTexture : public Texture
-{
-public:
-  ProceduralTexture() : Texture() {}
-  void createCheckerboard(int width, int height, int square_size);
-
-private:
-  virtual void buildMipmaps(void);
-  virtual void passToGpu(void);
-  virtual void freeImage(void);
-
-  GLubyte* image;
-  int image_width, image_height;
-};
-
+/* Represents a texture with depth info */
 class VolumeTexture : public Texture
 {
 public:
@@ -111,7 +107,16 @@ private:
   virtual void buildMipmaps(void);
   virtual void passToGpu(void);
   virtual void freeImage(void);
+
+  virtual void createOnGpu(void);
+  virtual void setWrapping(void);
+  virtual void setFilter(void);
+
+  virtual void bind(void);
+
   int image_width, image_height, image_depth;
+
+  GLubyte* image;
 };
 
 #endif

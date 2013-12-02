@@ -2,8 +2,7 @@
 
 Scene::Scene(GLuint view_width, 
 	     GLuint view_height) : width(view_width),	    
-				   height(view_height),
-				   in_toon_mode(0)
+				   height(view_height)
 {
   initObjects();
 }
@@ -18,6 +17,7 @@ void Scene::initObjects(void)
   light = new Light((GLfloat)1.0f, (GLfloat)10.0f, (GLfloat)0.0f, (GLfloat)0.0f);
 
   bounding_box_buffer = new Buffer(Buffer::FRAME, width, height);
+  output_image_buffer = new Buffer(Buffer::FRAME, width, height);
   
   // Prep buffer texture
   bounding_box_buffer->prepBufferTexture();
@@ -27,18 +27,34 @@ void Scene::initObjects(void)
 
   bounding_box_buffer->prepBuffer();
   bounding_box_buffer->createBuffer();
+
+  // Prep output volume image texture
+  output_image_buffer->prepBufferTexture();
+  output_image_buffer->setWrapping();
+  output_image_buffer->setFilter(Buffer::BufferFiltering::LINEAR);
+  output_image_buffer->createBufferTexture();
+
+  output_image_buffer->prepBuffer();
+  output_image_buffer->createBuffer();
 }
 
 Scene::~Scene()
 {
   delete camera;
+
   delete bounding_box_buffer;
+  delete output_image_buffer;
   delete bounding_box;
+
+  delete full_quad;
+
   delete light;
 }
 
-void Scene::render(void)
-{   
+void Scene::renderBoundingBox(void)
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   // Camera.
   MatrixStack::matrixMode(MatrixStack::VIEW);
   camera->aim();
@@ -55,13 +71,26 @@ void Scene::render(void)
   glCullFace(GL_FRONT);
   bounding_box->draw();
   bounding_box_buffer->unbind();
+}
 
-  // Then render back faces so we can calculate direction
-  // capture renders to texture
-  glCullFace(GL_BACK);
-  bounding_box->draw();
-
+void Scene::raycast(void)
+{
   // Here subtract backface colors from frontface colors
   // which gives ray direction, which we do in the shader
   ShaderSystem::useShader(ShaderSystem::RAYCASTING);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Render back faces so we can calculate direction
+  // capture renders to texture
+  glCullFace(GL_BACK);
+  bounding_box->draw();
+}
+
+void Scene::outputFinalImage(void)
+{
+  ShaderSystem::useShader(ShaderSystem::OUTPUT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  output_image_buffer->bindBufferTexture("outputVolume");
+  full_quad->draw();
 }
