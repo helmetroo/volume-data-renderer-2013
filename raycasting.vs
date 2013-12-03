@@ -13,7 +13,7 @@ varying vec3 boxTexCoords;
 void main()
 {
   bufferTexCoords = vec2(gl_MultiTexCoord0);
-  boxTexCoords = vec2(gl_MultiTexCoord6);
+  boxTexCoords = vec3(gl_MultiTexCoord6);
 
   gl_Position = ftransform();
 }

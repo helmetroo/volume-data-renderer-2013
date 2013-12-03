@@ -26,16 +26,26 @@
 
 #include <map>
 
-typedef std::map<ShaderProgramNames, ShaderProgram> ShaderMap;
-
 class ShaderSystem
 {
  public:
+  ~ShaderSystem();
+  
   // Constants for each program used
   enum ShaderProgramNames {
     PASSTHROUGH = 0,
     RAYCASTING  = 1,
     OUTPUT      = 2
+  };
+
+  struct ShaderProgram
+  {
+    GLuint shader_id;
+    GLuint shader_vp;
+    GLuint shader_fp;
+
+    ShaderProgram(GLuint _shader_id = 0, GLuint _shader_vp = 0, GLuint _shader_fp = 0)
+      : shader_id(_shader_id), shader_vp(_shader_vp), shader_fp(_shader_fp) {} 
   };
 
   inline static ShaderSystem* getInstance(void)
@@ -76,24 +86,13 @@ class ShaderSystem
     return glGetAttribLocation(currentShaderId(), name);
   }
 
-  
   void destroyShader(void);
- 
+
  private:
-  ShaderProgram();
-
-  struct ShaderProgram
-  {
-    GLuint shader_id;
-    GLuint shader_vp;
-    GLuint shader_fp;
-
-    ShaderProgram(GLuint _shader_id = 0, GLuint _shader_vp = 0, GLuint _shader_fp = 0)
-      : shader_id(_shader_id), shader_vp(_shader_vp), shader_fp(_shader_fp)  
-  };
+  ShaderSystem();
     
   static ShaderProgramNames current_program;
-  static ShaderMap shader_programs;
+  static std::map<ShaderProgramNames, ShaderProgram> shader_programs;
 
   static ShaderSystem* instance;
 

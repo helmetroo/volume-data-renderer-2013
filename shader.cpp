@@ -8,13 +8,16 @@
 
 #include "shader.hpp"
 
+typedef std::map<ShaderSystem::ShaderProgramNames, ShaderSystem::ShaderProgram> ShaderMap;
+
 // Static refs
 ShaderSystem::ShaderProgramNames ShaderSystem::current_program;
-ShaderSystem::ShaderMap shader_programs;
+ShaderSystem* ShaderSystem::instance;
+ShaderMap ShaderSystem::shader_programs;
 
 ShaderSystem::ShaderSystem()
 {
-  current_program = PHONG;
+  current_program = ShaderProgramNames::PASSTHROUGH;
 }
 
 ShaderSystem::~ShaderSystem()
@@ -121,10 +124,5 @@ void ShaderSystem::initShader(const char *vsFile, const char *fsFile, ShaderSyst
 // Destroys both shader programs.
 void ShaderSystem::destroyShader(void) 
 {
-  glDetachShader(shader_id, shader_fp);
-  glDetachShader(shader_id, shader_vp);
-    
-  glDeleteShader(shader_fp);
-  glDeleteShader(shader_vp);
-  glDeleteProgram(shader_id);
+
 }

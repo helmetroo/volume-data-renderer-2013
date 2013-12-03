@@ -15,12 +15,8 @@
 #include "glm/glm.hpp"
 
 #include "matrixstack.hpp"
-#include "object.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
-
-typedef glm::mat4 Matrix4;
-typedef glm::vec4 Vector4;
 
 #define NUM_FACES 6
 class BoundingBox
@@ -46,6 +42,7 @@ private:
   GLfloat* vertices;
   GLuint* indices;
 
+  void doVertex(GLfloat x, GLfloat y, GLfloat z);
   void renderPlane(int vert, int face_index);
 };
 

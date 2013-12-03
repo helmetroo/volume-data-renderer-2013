@@ -10,41 +10,41 @@ Scene::Scene(GLuint view_width,
 void Scene::initObjects(void)
 {
   // Initialize the camera
-  camera = new TrackballCamera(0, 0, 45, 0, 0, -1);
+  camera = new TrackballCamera(0.5, 0.5, -1.5, 0.5, 0.5, 1);
 
   // Init objects
   bounding_box = new BoundingBox;
   light = new Light((GLfloat)1.0f, (GLfloat)10.0f, (GLfloat)0.0f, (GLfloat)0.0f);
 
-  bounding_box_buffer = new Buffer(Buffer::FRAME, width, height);
-  output_image_buffer = new Buffer(Buffer::FRAME, width, height);
+  backface_texture = new BufferTexture(width, height);
+  output_texture = new BufferTexture(width, height);
   
-  // Prep buffer texture
-  bounding_box_buffer->prepBufferTexture();
-  bounding_box_buffer->setWrapping();
-  bounding_box_buffer->setFilter(Buffer::BufferFiltering::LINEAR);
-  bounding_box_buffer->createBufferTexture();
-
-  bounding_box_buffer->prepBuffer();
-  bounding_box_buffer->createBuffer();
+  // Prep backface render texture
+  backface_texture->createOnGpu();
+  backface_texture->setWrapping();
+  backface_texture->setFilter();
+  backface_texture->passToGpu();
 
   // Prep output volume image texture
-  output_image_buffer->prepBufferTexture();
-  output_image_buffer->setWrapping();
-  output_image_buffer->setFilter(Buffer::BufferFiltering::LINEAR);
-  output_image_buffer->createBufferTexture();
+  output_texture->createOnGpu();
+  output_texture->setWrapping();
+  output_texture->setFilter();
+  output_texture->passToGpu();
 
-  output_image_buffer->prepBuffer();
-  output_image_buffer->createBuffer();
+  // The volume texture
+  volume_texture = new VolumeTexture;
+  volume_texture->createTestTexture();
 }
 
 Scene::~Scene()
 {
   delete camera;
 
-  delete bounding_box_buffer;
-  delete output_image_buffer;
+  delete backface_texture;
+  delete output_texture;
   delete bounding_box;
+
+  delete volume_texture;
 
   delete full_quad;
 
@@ -53,44 +53,52 @@ Scene::~Scene()
 
 void Scene::renderBoundingBox(void)
 {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  ShaderSystem::useShader(ShaderSystem::PASSTHROUGH);
 
   // Camera.
   MatrixStack::matrixMode(MatrixStack::VIEW);
   camera->aim();
 
   MatrixStack::matrixMode(MatrixStack::WORLD);
-  
-  // Bind light position (may not need for now)
-  light->bindLightColor();
-  light->bindLightPos();
 
   // First draw front faces (to COL/TMP)
-  ShaderSystem::useShader(ShaderSystem::PASSTHROUGH);
-  bounding_box_buffer->bind();
+  /*
+  render_buffer->bind();
+  render_buffer->attachBufferToTexture(backface_texture);
+
   glCullFace(GL_FRONT);
   bounding_box->draw();
-  bounding_box_buffer->unbind();
+  */
+
+  glCullFace(GL_FRONT);
+  bounding_box->draw();
 }
 
 void Scene::raycast(void)
 {
   // Here subtract backface colors from frontface colors
   // which gives ray direction, which we do in the shader
-  ShaderSystem::useShader(ShaderSystem::RAYCASTING);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   // Render back faces so we can calculate direction
   // capture renders to texture
+  render_buffer->attachBufferToTexture(output_texture);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  ShaderSystem::useShader(ShaderSystem::RAYCASTING);
+  backface_texture->beginRender("backBoundingVol");
+  volume_texture->beginRender("volumeTexture");
   glCullFace(GL_BACK);
   bounding_box->draw();
+
+  render_buffer->unbind();
 }
 
 void Scene::outputFinalImage(void)
 {
   ShaderSystem::useShader(ShaderSystem::OUTPUT);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glLoadIdentity();
 
-  output_image_buffer->bindBufferTexture("outputVolume");
-  full_quad->draw();
+  backface_texture->beginRender("outputVolume");
+  // resize
+  full_quad->render();
 }

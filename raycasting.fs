@@ -9,7 +9,6 @@
 
 #define MAX_MARCHES 256
 
-uniform sampler2D frontBoundingVol;
 uniform sampler2D backBoundingVol;
 
 uniform sampler3D volumeTexture;
@@ -19,7 +18,7 @@ varying vec3 boxTexCoords;
 
 void main()
 {
-  const float stepSize = 0.1;
+  const float step_size = 0.1;
 
   // Calculate ray direction (back to front).
   vec3 origin = boxTexCoords;
@@ -27,7 +26,7 @@ void main()
   
   vec3 rayDirec = exitPoint.rgb - origin;
   rayDirec = normalize(rayDirec);
-  vec3 rayDelta = stepSize * rayDirec;
+  vec3 rayDelta = step_size * rayDirec;
 
   // Begin ray at origin
   vec3 ray = origin;

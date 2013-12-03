@@ -54,42 +54,6 @@ void onMouseMove(int x, int y);
 // Interactivity for controlling camera and shading type
 void toggleShading(unsigned char which);
 
-void display()
-{
-  // Use current shader program
-  ShaderSystem::useCurrentShader();
-
-  /* Clear depth and color buffers to prevent dirty writing */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- 
-  // Start working in world space.
-  glMatrixMode(GL_MODELVIEW); 
-  glLoadIdentity(); 
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::VIEW);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-
-  // Draw elements.
-  scene->render();
-  scene->raycast();
-
-  onWindowResize(scene->getWidth(), scene->getHeight());
-  scene->outputFinalImage();
-  
-  // Bind transformation / projection matrices.
-  MatrixStack::bindWorldMatrix();
-  MatrixStack::bindViewMatrix();
-  MatrixStack::bindProjectionMatrix();
-  MatrixStack::bindTextureMatrix();
-
-  // Swap buffers
-  glutSwapBuffers();
-}
-
 // Correctly scales all objects when the window is resized.
 void onWindowResize(int w, int h)
 {
@@ -139,6 +103,42 @@ void onWindowPerspResize(int w, int h)
   MatrixStack::loadIdentity();
 
   glutPostRedisplay();
+}
+
+void display()
+{
+  onWindowPerspResize(scene->getWidth(), scene->getHeight());
+
+  /* Clear depth and color buffers to prevent dirty writing */
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ 
+  // Start working in world space.
+  glMatrixMode(GL_MODELVIEW); 
+  glLoadIdentity(); 
+  MatrixStack::matrixMode(MatrixStack::WORLD);
+  MatrixStack::loadIdentity();
+
+  MatrixStack::matrixMode(MatrixStack::VIEW);
+  MatrixStack::loadIdentity();
+
+  MatrixStack::matrixMode(MatrixStack::WORLD);
+
+  // Draw elements.
+  scene->renderBoundingBox();
+  //  scene->raycast();
+
+  // Draw full screen quad to output final image.
+  //onWindowResize(scene->getWidth(), scene->getHeight());
+  //scene->outputFinalImage();
+  
+  // Bind transformation / projection matrices.
+  MatrixStack::bindWorldMatrix();
+  MatrixStack::bindViewMatrix();
+  MatrixStack::bindProjectionMatrix();
+  MatrixStack::bindTextureMatrix();
+
+  // Swap buffers
+  glutSwapBuffers();
 }
 
 // Drives all animations.
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 
   // Init GLUT with GLUI
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
   glutInitWindowSize(768, 512);
   main_window = glutCreateWindow("VolRay");
   GLUI_Master.set_glutReshapeFunc(onWindowPerspResize);
@@ -225,19 +225,18 @@ int main(int argc, char **argv)
 
   // Scene
   scene = new Scene(768, 512);
-  scene->initShaderVars();
 
   // Enable specific capabilities
   glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_GREATER);
+  glDepthFunc(GL_LEQUAL);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glEnable(GL_NORMALIZE);
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_CULL_FACE);
   glShadeModel(GL_SMOOTH);
-   
+  
   // "Background"
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   
   // UI
   initInterface();

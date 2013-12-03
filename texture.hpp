@@ -29,33 +29,33 @@ public:
   Texture();
   virtual ~Texture() {}
 
-  virtual void readFromFile(const char* file_name);
   void createTexture(bool mipmapped);
 
   inline void enable(void) {
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    enableCapability();
+    glActiveTexture(GL_TEXTURE0 + texture_unit);
   }
 
   inline void disable(void) {
-    glDisable(GL_TEXTURE_2D);
+    disableCapability();
     glActiveTexture(GL_TEXTURE0);
   }
 
   inline void coordinate(GLfloat s, GLfloat t) {
-    //printf("using unit %d\n", textureUnit);
-    glMultiTexCoord2f(GL_TEXTURE0 + textureUnit, s, t);
+    //printf("using unit %d\n", texture_unit);
+    glMultiTexCoord2f(GL_TEXTURE0 + texture_unit, s, t);
   };
 
-  void beginRender(char* texture_name);
-  void beginRenderToSphere(GLUquadric* sphere, char* texture_name);
+  void beginRender(const char* texture_name);
 
   void setTranslation(float _x, float _y, float _z);
   void setRotation(float _rot_angle, float _rot_axis_x, float _rot_axis_y, float _rot_axis_z);
   void setScale(float _sc_x, float _sc_y, float _sc_z);
   void transform(void);
 
-protected:
+  inline GLuint textureID(void) { return texture_id; }
+  inline static GLuint textureUnit(void) { return texture_unit; }
+
   virtual void buildMipmaps(void) = 0;
   virtual void passToGpu(void) = 0;
   virtual void freeImage(void) = 0;
@@ -63,24 +63,36 @@ protected:
   virtual void createOnGpu(void) = 0;
   virtual void setWrapping(void) = 0;
   virtual void setFilter(void) = 0;
+  virtual void setFilterWithMipmap(void) = 0;
 
   virtual void bind(void) = 0;
 
-  GLuint textureID;
-  static GLint textureUnit = 2;
+  virtual void enableCapability(void) = 0;
+  virtual void disableCapability(void) = 0;
 
+protected:
+  GLuint texture_id;
+  static GLuint texture_unit;
+
+  // Transform
   float rot_angle, rot_axis_x, rot_axis_y, rot_axis_z;
   float sc_x, sc_y, sc_z;
   float x, y, z;
 };
 
-/* Represents a texture generated from an image file (TGA) */
-class ImageTexture : public Texture
+/* Texture for use with frame buffer */
+class BufferTexture : public Texture
 {
 public:
-  ImageTexture() : Texture() {}
+  BufferTexture(GLuint _width, GLuint _height) : Texture() 
+  { 
+    width = _width;
+    height = _height; 
+  } 
 
-protected:
+  virtual void enableCapability(void);
+  virtual void disableCapability(void);
+
   virtual void buildMipmaps(void);
   virtual void passToGpu(void);
   virtual void freeImage(void);
@@ -88,13 +100,12 @@ protected:
   virtual void createOnGpu(void);
   virtual void setWrapping(void);
   virtual void setFilter(void);
+  virtual void setFilterWithMipmap(void);
 
   virtual void bind(void);
 
-  FILE* openImageFile(const char* name);
-  void readImageFile(FILE* file, const char* name, gliGenericImage** dest);
-
-  gliGenericImage* image;
+private:
+  GLuint width, height;
 };
 
 /* Represents a texture with depth info */
@@ -102,8 +113,12 @@ class VolumeTexture : public Texture
 {
 public:
   VolumeTexture() : Texture() {}
+  virtual void enableCapability(void);
+  virtual void disableCapability(void);
 
-private:
+  void readFromFile(const char* name);
+  void createTestTexture(void);
+
   virtual void buildMipmaps(void);
   virtual void passToGpu(void);
   virtual void freeImage(void);
@@ -111,11 +126,12 @@ private:
   virtual void createOnGpu(void);
   virtual void setWrapping(void);
   virtual void setFilter(void);
+  virtual void setFilterWithMipmap(void);
 
   virtual void bind(void);
 
+private:
   int image_width, image_height, image_depth;
-
   GLubyte* image;
 };
 

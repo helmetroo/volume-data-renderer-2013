@@ -1,10 +1,10 @@
 #include "texture.hpp"
 
-GLint Texture::textureUnit = 0;
+GLuint Texture::texture_unit = 2;
 
 Texture::Texture()
 {
-  ++textureUnit;
+  ++texture_unit;
 
   setTranslation(0.0f, 0.0f, 0.0f);
   setRotation(0.0f, 0.0f, 0.0f, 1.0f);
@@ -31,19 +31,12 @@ void Texture::createTexture(bool mipmapped)
   freeImage();
 }
 
-
-void Texture::beginRender(char* texture_name)
+void Texture::beginRender(const char* texture_name)
 {
   enable();
   bind();
 
-  glUniform1i(ShaderSystem::getUniformFromCurrentShader(texture_name), textureUnit);
-}
-
-void Texture::beginRenderToSphere(GLUquadric* sphere, char* texture_name)
-{
-  beginRender(texture_name);
-  gluQuadricTexture(sphere, GLU_TRUE);
+  glUniform1i(ShaderSystem::getUniformFromCurrentShader(texture_name), texture_unit);
 }
 
 void Texture::setTranslation(float _x, float _y, float _z)
@@ -80,86 +73,79 @@ void Texture::transform(void)
   glMatrixMode(GL_MODELVIEW); MatrixStack::matrixMode(MatrixStack::WORLD);
 }
 
-void ImageTexture::bind(void)
+void BufferTexture::enableCapability(void)
 {
-  glBindTexture(GL_TEXTURE_2D, textureID);
+  glEnable(GL_TEXTURE_2D);
 }
 
-void ImageTexture::createOnGpu(void)
+void BufferTexture::disableCapability(void)
 {
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_2D, textureID);
+  glDisable(GL_TEXTURE_2D);
 }
 
-void ImageTexture::setWrapping(void)
+void BufferTexture::bind(void)
+{
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+}
+
+void BufferTexture::createOnGpu(void)
+{
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+}
+
+void BufferTexture::setWrapping(void)
 {
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 }
 
-void ImageTexture::setFilter(void)
+void BufferTexture::setFilter(void)
 {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-void ImageTexture::setFilterWithMipmap(void)
+void BufferTexture::setFilterWithMipmap(void)
 {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 }
 
-void ImageTexture::buildMipmaps(void)
+void BufferTexture::buildMipmaps(void)
 {
-  gluBuild2DMipmaps(GL_TEXTURE_2D, image->components, image->width, image->height, image->components, GL_UNSIGNED_BYTE, image->pixels);
+  
 }
 
-void ImageTexture::passToGpu(void)
+void BufferTexture::passToGpu(void)
 {
-  glTexImage2D(GL_TEXTURE_2D, 0, image->components, image->width, image->height, 0, image->format, GL_UNSIGNED_BYTE, image->pixels);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 }
 
-void ImageTexture::freeImage(void)
+void BufferTexture::freeImage(void)
 {
-  free(image);
 }
 
-void ImageTexture::readFromFile(const char* file_name)
+void VolumeTexture::enableCapability(void)
 {
-  FILE* image_file = openImageFile(file_name);
-  readImageFile(image_file, file_name, &image); 
+  glEnable(GL_TEXTURE_3D);
 }
 
-FILE* ImageTexture::openImageFile(const char* file_name)
+void VolumeTexture::disableCapability(void)
 {
-  FILE* file = fopen(file_name, "rb");
-
-  if(file == NULL)
-    {
-      printf("Oops! Could not open %s\n", file_name);
-      exit(1);
-    }
-
-  return file;
+  glDisable(GL_TEXTURE_3D);
 }
-
-void ImageTexture::readImageFile(FILE* file, const char* file_name, gliGenericImage** dest)
-{
-  *dest = gliReadTGA(file, const_cast<char*>(file_name));
-  fclose(file);
-}
-
 
 /* Volume texture methods */
 void VolumeTexture::bind(void)
 {
-  glBindTexture(GL_TEXTURE_2D, textureID);
+  glBindTexture(GL_TEXTURE_3D, texture_id);
 }
 
 void VolumeTexture::createOnGpu(void)
 {
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_3D, textureID);
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_3D, texture_id);
 }
 
 void VolumeTexture::setWrapping(void)
@@ -187,6 +173,14 @@ void VolumeTexture::buildMipmaps(void)
 void VolumeTexture::passToGpu(void)
 {
   glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, image_width, image_height, image_depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+}
+
+void VolumeTexture::readFromFile(const char* name)
+{
+}
+
+void VolumeTexture::createTestTexture(void)
+{
 }
 
 void VolumeTexture::freeImage(void)

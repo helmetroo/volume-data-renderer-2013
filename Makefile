@@ -1,4 +1,4 @@
-SOURCE = shader.cpp light.cpp texture.cpp buffer.cpp matrixstack.cpp boundingbox.cpp trackball.cpp scene.cpp main.cpp
+SOURCE = fullquad.cpp shader.cpp light.cpp texture.cpp buffer.cpp matrixstack.cpp boundingbox.cpp trackball.cpp scene.cpp main.cpp
 OBJECTS = $(SOURCE:.cpp=.o)
 EXE = output
 CC = g++

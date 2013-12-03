@@ -12,6 +12,7 @@
 #endif
 
 #include "shader.hpp"
+#include "texture.hpp"
 
 class Buffer
 {
@@ -19,30 +20,19 @@ public:
   enum BufferType
     {
       FRAME,
-      DEPTH
-    };
-
-  enum BufferFiltering
-    {
-      NEAREST = GL_NEAREST, 
-      LINEAR  = GL_LINEAR
+      DEPTH,
+      RENDER
     };
 
   Buffer(BufferType which, GLuint _width, GLuint _height);
   ~Buffer();
 
-  void prepBufferTexture(void);
-  void setFilter(BufferFiltering filter);
-  void setWrapping(void);
+  void prepBuffer(void);
   void setComparison(void);
-  void createBufferTexture(bool with_alpha);
-  void createBuffer(void);
+  void attachBufferToTexture(Texture* texture);
 
   void bind(void);
   void unbind(void);
-
-  void bindBufferTexture(const char* name);
-  void unbindBufferTexture(void);
 
   void clearDepth(void);
   void disableDraw(void);
@@ -53,9 +43,6 @@ private:
   int width;
   int height;
 
-  static int texture_unit = -1;
-
-  GLuint texture_ptr;
   GLuint buffer_ptr;
 };
 

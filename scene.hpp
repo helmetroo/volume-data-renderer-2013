@@ -10,6 +10,9 @@
 #include "trackball.hpp"
 #include "light.hpp"
 
+#include "buffer.hpp"
+#include "texture.hpp"
+
 class Scene
 {
 public:
@@ -37,15 +40,16 @@ private:
   Light* light;
 
   // Volume
-  VolumeTexture* volume;
+  VolumeTexture* volume_texture;
 
   // Buffer
-  Buffer* bounding_box_buffer;
-  Buffer* output_image_buffer;
+  Buffer* render_buffer;
+  BufferTexture* backface_texture;
+  BufferTexture* output_texture;
   GLuint width, height;
 
   // Full-screen quad
-FullQuad* full_quad;
+  FullQuad* full_quad;
 };
 
 #endif
