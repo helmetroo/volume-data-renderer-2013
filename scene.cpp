@@ -10,7 +10,7 @@ Scene::Scene(GLuint view_width,
 void Scene::initObjects(void)
 {
   // Initialize the camera
-  camera = new TrackballCamera(0.5, 0.5, 3.0, 0.5, 0.5, -1);
+  camera = new TrackballCamera(0.5f, 0.5f, 3.0f, 0.5f, 0.5f, -1.0f);
 
   // Init objects
   bounding_box = new BoundingBox;
