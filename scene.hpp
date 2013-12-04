@@ -43,7 +43,7 @@ private:
   VolumeTexture* volume_texture;
 
   // Buffer
-  Buffer* render_buffer;
+  OutputBuffer* render_buffer;
   BufferTexture* backface_texture;
   BufferTexture* output_texture;
   GLuint width, height;

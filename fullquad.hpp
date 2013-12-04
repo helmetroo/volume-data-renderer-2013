@@ -25,8 +25,8 @@ public:
   void render(void);
   inline void doVertex(float x, float y) 
   {
-    glVertex2f(x, y); 
     glMultiTexCoord2f(GL_TEXTURE7, x, y);
+    glVertex2f(x, y); 
   }
 };
 

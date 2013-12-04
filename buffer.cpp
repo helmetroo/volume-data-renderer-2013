@@ -1,92 +1,91 @@
 #include "buffer.hpp"
 
-Buffer::Buffer(BufferType which, GLuint _width, GLuint _height)
+OutputBuffer::OutputBuffer(GLuint _width, GLuint _height)
 {
-  which_to_use = which;
   width = _width;
   height = _height;
 
-  buffer_ptr = 0;
-}
-
-Buffer::~Buffer()
-{
+  frame_buffer_ptr = 0;
+  render_buffer_ptr = 0;
 }
 
 // Depth buffer only
-void Buffer::setComparison(void)
+void OutputBuffer::setDepthComparison(void)
 {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 }
 
-void Buffer::prepBuffer(void)
+void OutputBuffer::createFrameBuffer(void)
 {
   // Create a frame buffer to hold the texture
-  glGenFramebuffers(1, &buffer_ptr);
-  glBindFramebuffer(GL_FRAMEBUFFER, buffer_ptr);
+  glGenFramebuffers(1, &frame_buffer_ptr);
+  bindFrameBuffer();
 }
 
-void Buffer::attachBufferToTexture(Texture* texture)
+void OutputBuffer::createRenderBuffer(void)
+{
+  //Create a frame buffer to hold the texture
+  glGenRenderbuffers(1, &render_buffer_ptr);
+  bindRenderBuffer();
+}
+
+void OutputBuffer::declareBufferStorage(void)
+{
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+}
+
+void OutputBuffer::attachRenderBufferToFrameBuffer(void)
+{
+  // Allow
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, render_buffer_ptr);
+}
+
+void OutputBuffer::attachFrameBufferToTexture(Texture* texture)
 {
   // Attach texture to this new buffer.
-  // Apple machines have this method as an extension.
-  if(which_to_use == Buffer::BufferType::DEPTH) {
-#ifdef __APPLE__
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->textureID(), 0);
-#else
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->textureID(), 0);
-#endif
-  } else {
+  // Apple machines have this method as an extension, but none of the constants need EXT??
 #ifdef __APPLE__
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->textureID(), 0);
 #else
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->textureID(), 0);
 #endif
-  }
 }
 
-void Buffer::disableDraw(void)
+void OutputBuffer::disableDraw(void)
 {
   glDrawBuffer(GL_NONE);
-
-  if(which_to_use == Buffer::BufferType::DEPTH)
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 }
 
-void Buffer::enableDraw(void)
+void OutputBuffer::enableDraw(void)
 {
-  if(which_to_use == Buffer::BufferType::DEPTH)
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-}
- 
-void Buffer::bind(void)
-{
-  // Bind the frame buffer and establish viewport for it
-  glBindFramebuffer(GL_FRAMEBUFFER, buffer_ptr);
-  
-  int tx, ty = 0;
-  GLUI_Master.get_viewport_area(&tx, &ty, &width, &height);
-  glViewport(0, 0, width, height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // No color updates
-  if(which_to_use == Buffer::BufferType::DEPTH)
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-void Buffer::unbind(void)
+void OutputBuffer::initViewport(void)
 {
   int tx, ty = 0;
   GLUI_Master.get_viewport_area(&tx, &ty, &width, &height);
   glViewport(0, 0, width, height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+} 
 
+void OutputBuffer::bindFrameBuffer(void)
+{
+  glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_ptr);
+}
+
+void OutputBuffer::unbindFrameBuffer(void)
+{
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
- 
-void Buffer::clearDepth(void)
+
+void OutputBuffer::bindRenderBuffer(void)
 {
-  glClearDepth(1.0f);
-  glClear(GL_DEPTH_BUFFER_BIT);
+  glBindRenderbuffer(GL_RENDERBUFFER, render_buffer_ptr);
+}
+
+void OutputBuffer::unbindRenderBuffer(void)
+{
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }

@@ -1,3 +1,9 @@
+/*
+ * CS 5610-1 Project
+ *
+ * Represents a render buffer with final output frame buffer. 
+ */
+
 #ifndef BUFFER_H
 #define BUFFER_H
 
@@ -14,36 +20,35 @@
 #include "shader.hpp"
 #include "texture.hpp"
 
-class Buffer
+class OutputBuffer
 {
 public:
-  enum BufferType
-    {
-      FRAME,
-      DEPTH,
-      RENDER
-    };
+  OutputBuffer(GLuint _width, GLuint _height);
 
-  Buffer(BufferType which, GLuint _width, GLuint _height);
-  ~Buffer();
+  void createFrameBuffer(void);
+  void createRenderBuffer(void);
+  void declareBufferStorage(void);
 
-  void prepBuffer(void);
-  void setComparison(void);
-  void attachBufferToTexture(Texture* texture);
+  void setDepthComparison(void);
+  void attachRenderBufferToFrameBuffer(void);
+  void attachFrameBufferToTexture(Texture* texture);
 
-  void bind(void);
-  void unbind(void);
+  void initViewport(void);
 
-  void clearDepth(void);
+  void bindFrameBuffer(void);
+  void unbindFrameBuffer(void);
+  void bindRenderBuffer(void);
+  void unbindRenderBuffer(void);
+
   void disableDraw(void);
   void enableDraw(void);
 
 private:
-  BufferType which_to_use;
   int width;
   int height;
 
-  GLuint buffer_ptr;
+  GLuint frame_buffer_ptr;
+  GLuint render_buffer_ptr;
 };
 
 #endif

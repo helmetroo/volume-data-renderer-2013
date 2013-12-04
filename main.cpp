@@ -107,9 +107,8 @@ void onWindowPerspResize(int w, int h)
 
 void display()
 {
+  // Init display for rendering
   onWindowPerspResize(scene->getWidth(), scene->getHeight());
-
-  /* Clear depth and color buffers to prevent dirty writing */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
   // Start working in world space.
@@ -125,7 +124,7 @@ void display()
 
   // Draw elements.
   scene->renderBoundingBox();
-  //  scene->raycast();
+  //scene->raycast();
 
   // Draw full screen quad to output final image.
   //onWindowResize(scene->getWidth(), scene->getHeight());

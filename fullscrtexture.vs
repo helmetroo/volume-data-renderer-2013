@@ -5,10 +5,10 @@
  * Passthrough Vertex Shader
  */
 
-varying vec2 screenCoords;
+varying vec2 screen_coords;
 
 void main()
 {
-  screenCoords = vec2(gl_MultiTexCoord7);
+  screen_coords = vec2(gl_MultiTexCoord7);
   gl_Position = gl_Vertex;
 }
