@@ -37,6 +37,7 @@ void Scene::initObjects(void)
 
   // The volume texture
   volume_texture = new VolumeTexture;
+  volume_texture->createTestTexture();
   
   // Create render buffer to create necessary render step for framebuffer
   render_buffer->createRenderBuffer();
@@ -65,6 +66,7 @@ Scene::~Scene()
 void Scene::renderBoundingBox(void)
 {
   ShaderSystem::useShader(ShaderSystem::PASSTHROUGH);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Camera transforms.
   MatrixStack::matrixMode(MatrixStack::VIEW);
@@ -73,10 +75,10 @@ void Scene::renderBoundingBox(void)
   MatrixStack::matrixMode(MatrixStack::WORLD);
 
   // Output backfaces to the external frame buffer
-  //render_buffer->bindFrameBuffer();
-  //render_buffer->bindRenderBuffer();
+  render_buffer->bindFrameBuffer();
+  render_buffer->bindRenderBuffer();
 
-  //render_buffer->attachFrameBufferToTexture(backface_texture);
+  render_buffer->attachFrameBufferToTexture(backface_texture);
 
   glCullFace(GL_FRONT);
   bounding_box->draw();

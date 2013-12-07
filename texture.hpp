@@ -112,6 +112,24 @@ private:
 class VolumeTexture : public Texture
 {
 public:
+  struct Vector3
+  {
+    GLfloat x, y, z;
+    
+    Vector3(GLfloat _x, GLfloat _y, GLfloat _z) : x(_x), y(_y), z(_z) {}
+    GLfloat length(void) { return sqrt(x*x + y*y + z*z); }
+      Vector3 operator-(const Vector3& rhs) 
+      {
+	Vector3 result(x - rhs.x, y - rhs.y, z - rhs.z);
+	return result;
+      }
+      
+      Vector3 operator+(const Vector3& rhs) 
+      {
+	Vector3 result(x + rhs.x, y + rhs.y, z + rhs.z);
+	return result;
+      }
+  };
   VolumeTexture() : Texture() {}
   virtual void enableCapability(void);
   virtual void disableCapability(void);

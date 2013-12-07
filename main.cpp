@@ -124,11 +124,11 @@ void display()
 
   // Draw elements.
   scene->renderBoundingBox();
-  //scene->raycast();
+  scene->raycast();
 
   // Draw full screen quad to output final image.
-  //onWindowResize(scene->getWidth(), scene->getHeight());
-  //scene->outputFinalImage();
+  onWindowResize(scene->getWidth(), scene->getHeight());
+  scene->outputFinalImage();
   
   // Bind transformation / projection matrices.
   MatrixStack::bindWorldMatrix();
