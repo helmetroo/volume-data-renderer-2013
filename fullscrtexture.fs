@@ -11,5 +11,6 @@ uniform sampler2D output_image;
 
 void main()
 {
-  gl_FragColor = texture2D(output_image, screen_coords);
+  // Convert to normalized device coords, and we're done!
+  gl_FragColor = texture2D(output_image, (screen_coords+1.0)/2.0);
 }

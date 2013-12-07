@@ -17,10 +17,15 @@ uniform sampler3D volume_texture;
 varying vec4 out_position;
 varying vec3 box_tex_coords;
 
+// Custom parameters
+uniform float step;
+uniform float intensity;
+
 void main()
 {
   // TODO change to uniform from app
-  const float step_size = 0.1;
+  const float step_size = 0.05;
+  const float intensity = 2.0;
 
   // Calculate ray direction (back to front).
   // Indexing backfaces texture requires a conversion of
@@ -46,11 +51,16 @@ void main()
       float sample_alpha = sample_color.a*step_size;
 
       // Back to front color blending to output color at a pixel
-      final_color += (1.0 - final_alpha)*sample_color*sample_alpha;
+      final_color += (1.0 - final_alpha)*sample_color*sample_alpha*intensity;
       final_alpha += sample_alpha;
 
       // Move to next position
       ray += rayDelta;
+
+      if(sample_alpha > 1.0) {
+	sample_alpha = 1.0; 
+	break;
+      }
     }
 
   gl_FragColor = final_color;

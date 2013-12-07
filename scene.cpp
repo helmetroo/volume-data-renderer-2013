@@ -86,7 +86,7 @@ void Scene::renderBoundingBox(void)
 
 void Scene::raycast(void)
 {
-  // Here subtract backface colors from frontface vertices (texcoords)
+  // Here subtract frontface colors from backface colors
   // which gives ray direction, which we do in the raymarcher.
   ShaderSystem::useShader(ShaderSystem::RAYCASTING);
   render_buffer->attachFrameBufferToTexture(output_texture);
