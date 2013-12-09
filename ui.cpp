@@ -4,7 +4,6 @@ UI::UI(const int& _width, const int& _height) : width(_width),
 						height(_height)
 {
   scene = new Scene(width, height);
-  matrix_stack = new MatrixStack;
 }
 
 void UI::initGlCapabilities(void)
@@ -65,21 +64,14 @@ void UI::onWindowResize(int w, int h)
   GLUI_Master.get_viewport_area(&tx, &ty, &w, &h);
 
   glViewport(0, 0, w, h);
-  glMatrixMode(GL_PROJECTION); MatrixStack::matrixMode(MatrixStack::PROJECTION);
-  glLoadIdentity(); MatrixStack::loadIdentity();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
 
   // We are rendering just two triangles, so no fancy projection.
   glOrtho(0, w, h, 0, -1, 1);
-  MatrixStack::ortho(w, h);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::VIEW);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
 
   glutPostRedisplay();
 }
@@ -90,21 +82,14 @@ void UI::onWindowPerspResize(int w, int h)
   GLUI_Master.get_viewport_area(&tx, &ty, &w, &h);
 
   glViewport(0, 0, w, h);
-  glMatrixMode(GL_PROJECTION); MatrixStack::matrixMode(MatrixStack::PROJECTION);
-  glLoadIdentity(); MatrixStack::loadIdentity();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
 
   // We are rendering just two triangles, so no fancy projection.
   gluPerspective(45.0f, (GLfloat)w/(GLfloat)h, 0.01f, 400.0f);
-  MatrixStack::perspective(45.0f, (GLfloat)w/(GLfloat)h, 0.01f, 400.0f);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::VIEW);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
 
   glutPostRedisplay();
 }
@@ -118,13 +103,6 @@ void UI::display(void)
   // Start working in world space.
   glMatrixMode(GL_MODELVIEW); 
   glLoadIdentity(); 
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::VIEW);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
 
   // Draw elements.
   scene->renderBoundingBox();
@@ -134,12 +112,6 @@ void UI::display(void)
   onWindowResize(scene->getWidth(), scene->getHeight());
   scene->outputFinalImage();
   
-  // Bind transformation / projection matrices.
-  MatrixStack::bindWorldMatrix();
-  MatrixStack::bindViewMatrix();
-  MatrixStack::bindProjectionMatrix();
-  MatrixStack::bindTextureMatrix();
-
   // Swap buffers
   glutSwapBuffers();
 }
@@ -184,6 +156,5 @@ void UI::onKeyDown(unsigned char key, int x, int y)
 void UI::onClose(void)
 {
   delete shader_system_instance;
-  delete matrix_stack;
   delete scene;
 }

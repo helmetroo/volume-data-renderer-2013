@@ -68,10 +68,7 @@ void Scene::renderBoundingBox(void)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Camera transforms.
-  MatrixStack::matrixMode(MatrixStack::VIEW);
   camera->aim();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
 
   // Output backfaces to the external frame buffer
   render_buffer->bindFrameBuffer();

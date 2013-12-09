@@ -20,7 +20,6 @@
 
 #include <cstdlib>
 
-#include "matrixstack.hpp"
 #include "shader.hpp"
 #include "scene.hpp"
 
@@ -113,7 +112,6 @@ int main_window;
 
 // Key components
   Scene* scene;
-MatrixStack* matrix_stack;
   ShaderSystem* shader_system_instance;
 };
 

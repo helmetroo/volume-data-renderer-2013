@@ -5,7 +5,6 @@
 #include "boundingbox.hpp"
 #include "fullquad.hpp"
 
-#include "matrixstack.hpp"
 #include "shader.hpp"
 #include "trackball.hpp"
 #include "light.hpp"

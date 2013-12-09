@@ -42,7 +42,7 @@ BoundingBox::~BoundingBox()
 
 void BoundingBox::draw(void)
 {
-  glPushMatrix(); MatrixStack::pushMatrix();
+  glPushMatrix();
   glMultMatrixf(rotation_matrix);
 
   for(int vert = 0; vert < (NUM_FACES << 2); vert += 4)
@@ -51,7 +51,7 @@ void BoundingBox::draw(void)
       renderPlane(vert, face_index);
     }
 
-  glPopMatrix(); MatrixStack::popMatrix();
+  glPopMatrix();
 }
 
 void BoundingBox::doVertex(GLfloat x, GLfloat y, GLfloat z)

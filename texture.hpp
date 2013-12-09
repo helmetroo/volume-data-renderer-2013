@@ -21,7 +21,6 @@
 #include <math.h>
 
 #include "tga.hpp"
-#include "matrixstack.hpp"
 #include "shader.hpp"
 
 #include "codebase.hpp"

@@ -63,14 +63,14 @@ void Texture::setScale(float _sc_x, float _sc_y, float _sc_z)
 
 void Texture::transform(void)
 {
-  glMatrixMode(GL_TEXTURE); MatrixStack::matrixMode(MatrixStack::TEXTURE);
-  glLoadIdentity(); MatrixStack::loadIdentity();
+  glMatrixMode(GL_TEXTURE);
+  glLoadIdentity();
 
-  glTranslatef(x, y, z); MatrixStack::translate(x, y, z);
-  glRotatef(rot_angle, rot_axis_x, rot_axis_y, rot_axis_z); MatrixStack::rotate(rot_angle, rot_axis_x, rot_axis_y, rot_axis_z);
-  glScalef(sc_x, sc_y, sc_z); MatrixStack::scale(sc_x, sc_y, sc_z);
+  glTranslatef(x, y, z);
+  glRotatef(rot_angle, rot_axis_x, rot_axis_y, rot_axis_z);
+  glScalef(sc_x, sc_y, sc_z);
 
-  glMatrixMode(GL_MODELVIEW); MatrixStack::matrixMode(MatrixStack::WORLD);
+  glMatrixMode(GL_MODELVIEW);
 }
 
 void BufferTexture::enableCapability(void)
@@ -290,5 +290,5 @@ GLubyte* VolumeTexture::readVolumeData(const char* file_name)
 
 void VolumeTexture::freeImage(void)
 {
-  //delete[] image;
+  delete[] image;
 }

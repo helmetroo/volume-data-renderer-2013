@@ -16,7 +16,6 @@
 #include "GL/glut.h"
 #endif
 
-#include "matrixstack.hpp"
 #include "shader.hpp"
 
 #include <math.h>
@@ -32,7 +31,6 @@ public:
 
   inline void aim(void) {
     gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);
-    MatrixStack::lookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);
   }
 
   inline float* zRef(void) { return &eye[2]; }
