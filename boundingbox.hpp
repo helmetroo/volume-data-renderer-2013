@@ -12,8 +12,6 @@
 #include <math.h>
 #include <algorithm>
 
-#include "glm/glm.hpp"
-
 #include "shader.hpp"
 #include "texture.hpp"
 

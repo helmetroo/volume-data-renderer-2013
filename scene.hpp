@@ -7,7 +7,6 @@
 
 #include "shader.hpp"
 #include "trackball.hpp"
-#include "light.hpp"
 
 #include "buffer.hpp"
 #include "texture.hpp"
@@ -27,7 +26,6 @@ public:
   inline GLuint getHeight(void) { return height; }
 
   inline BoundingBox* getBoundingBox(void)  { return bounding_box; }
-  inline Light* getLight(void)              { return light; }
   inline TrackballCamera* getCamera(void)   { return camera; }
 
 private:
@@ -36,7 +34,6 @@ private:
   
   // Camera
   TrackballCamera* camera;
-  Light* light;
 
   // Volume
   VolumeTexture* volume_texture;

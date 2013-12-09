@@ -1,4 +1,4 @@
-SOURCE = ddsbase.cpp fullquad.cpp shader.cpp light.cpp texture.cpp buffer.cpp boundingbox.cpp trackball.cpp scene.cpp ui.cpp main.cpp
+SOURCE = ddsbase.cpp fullquad.cpp shader.cpp texture.cpp buffer.cpp boundingbox.cpp trackball.cpp scene.cpp ui.cpp main.cpp
 OBJECTS = $(SOURCE:.cpp=.o)
 EXE = output
 CC = g++

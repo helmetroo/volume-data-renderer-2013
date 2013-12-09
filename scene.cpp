@@ -13,7 +13,6 @@ void Scene::initObjects(void)
 
   // Init objects
   bounding_box = new BoundingBox;
-  light = new Light((GLfloat)1.0f, (GLfloat)10.0f, (GLfloat)0.0f, (GLfloat)0.0f);
 
   render_buffer = new OutputBuffer(width, height);
   render_buffer->createFrameBuffer();
@@ -57,9 +56,6 @@ Scene::~Scene()
   delete volume_texture;
 
   delete full_quad;
-
-  // May oust
-  delete light;
 }
 
 void Scene::renderBoundingBox(void)
