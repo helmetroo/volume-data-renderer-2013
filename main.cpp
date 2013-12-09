@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 
   ui->initShaderSystem();
   ui->initGlCapabilities();
-  ui->setBackground();
+  ui->setBackground(0.0f, 0.0f, 0.0f, 1.0f);
   ui->initSceneObjects();
   ui->buildInterface();
 

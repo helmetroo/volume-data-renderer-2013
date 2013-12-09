@@ -89,9 +89,9 @@ void onClose(void);
   void onMouseClick(int button, int state, int x, int y);
   void onMouseMove(int x, int y);
 
-inline void setBackground(void)
+inline void setBackground(float r, float g, float b, float a)
 {
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+glClearColor(r, g, b, a);
 }
 
 inline void run(void)
@@ -105,10 +105,8 @@ int main_window;
 
   GLUI* glui;
 
-  GLUI_Rollout* shadow_choice_rollout;
-  GLUI_Rollout* light_position_rollout;
-
-  GLUI_Panel* light_transform_panel;
+  GLUI_Rollout* transform_rollout;
+  GLUI_Panel* transform_panel;
 
   GLUI_Translation* bounding_box_zoomer;
   GLUI_Rotation* bounding_box_rotater;

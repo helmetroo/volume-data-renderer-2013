@@ -27,6 +27,7 @@ public:
   inline GLuint getWidth(void) { return width; } 
   inline GLuint getHeight(void) { return height; }
 
+  inline BoundingBox* getBoundingBox(void)  { return bounding_box; }
   inline Light* getLight(void)              { return light; }
   inline TrackballCamera* getCamera(void)   { return camera; }
 

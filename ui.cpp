@@ -48,6 +48,12 @@ void UI::buildInterface(void)
   // Quit
   glui->add_button("Quit", 0, (GLUI_Update_CB)exit);
 
+  // Transformations for bounding box
+  transform_rollout = glui->add_rollout("View");
+  transform_panel = glui->add_panel_to_panel(transform_rollout, "", GLUI_PANEL_NONE);
+  bounding_box_zoomer = glui->add_translation_to_panel(transform_panel, "Zoom", GLUI_TRANSLATION_Y, scene->getCamera()->zRef());
+  bounding_box_rotater = glui->add_rotation_to_panel(transform_panel, "Rotation", scene->getBoundingBox()->rotationMatrix());
+
   // Bind interface to window
   glui->set_main_gfx_window(main_window);
 }
@@ -159,7 +165,6 @@ void UI::onMouseClick(int button, int state, int x, int y)
 // Implements the trackball.
 void UI::onMouseMove(int x, int y)
 {
-  scene->getCamera()->updateRotation(x, y);
   glutPostRedisplay();
 }
 

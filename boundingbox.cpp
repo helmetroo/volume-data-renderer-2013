@@ -2,6 +2,14 @@
 
 BoundingBox::BoundingBox()
 {
+  rotation_matrix = new float[16]
+    {
+      1.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 1.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 1.0f
+    };
+
   indices = new GLuint[NUM_FACES * 4]
     {
       0, 3, 4, 2,  // LEFT
@@ -35,7 +43,8 @@ BoundingBox::~BoundingBox()
 void BoundingBox::draw(void)
 {
   glPushMatrix(); MatrixStack::pushMatrix();
-  
+  glMultMatrixf(rotation_matrix);
+
   for(int vert = 0; vert < (NUM_FACES << 2); vert += 4)
     {
       int face_index = vert >> 2;

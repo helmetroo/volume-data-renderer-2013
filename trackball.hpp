@@ -35,10 +35,7 @@ public:
     MatrixStack::lookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);
   }
 
-  inline void aimFromLight(GLfloat* light_pos) {
-    gluLookAt(light_pos[0], light_pos[1], light_pos[2], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-    MatrixStack::lookAt(light_pos[0], light_pos[1], light_pos[2], 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-  }
+  inline float* zRef(void) { return &eye[2]; }
 
   inline void bindPosition(void) {
     glUniform3fv(ShaderSystem::getUniformFromCurrentShader("camPosition"), 1, eye);

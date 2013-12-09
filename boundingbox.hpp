@@ -36,10 +36,12 @@ public:
   ~BoundingBox();
 
   void draw(void);
+  inline float* rotationMatrix(void) { return rotation_matrix; }
 
 private:
   GLfloat* vertices;
   GLuint* indices;
+  float* rotation_matrix;
 
   void doVertex(GLfloat x, GLfloat y, GLfloat z);
   void renderPlane(int vert, int face_index);
