@@ -18,9 +18,13 @@ public:
   ~Scene();
 
   void initObjects(void);
+
+  // Raycasting steps
   void renderBoundingBox(void);
   void raycast(void);
   void outputFinalImage(void);
+
+  void changeVolumeFromFileName(const char* name);
 
   inline GLuint getWidth(void) { return width; } 
   inline GLuint getHeight(void) { return height; }

@@ -130,6 +130,17 @@ void BufferTexture::freeImage(void)
 {
 }
 
+VolumeTexture::VolumeTexture() : Texture() 
+{
+  image_width = 0;
+  image_height = 0;
+  image_depth = 0;
+
+  image_component = GL_RGBA;
+
+  image = NULL;
+}
+
 void VolumeTexture::enableCapability(void)
 {
   glEnable(GL_TEXTURE_3D);
@@ -171,25 +182,24 @@ void VolumeTexture::setFilterWithMipmap(void)
 
 void VolumeTexture::buildMipmaps(void)
 {
-
 }
 
 void VolumeTexture::passToGpu(void)
 {
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, image_width, image_height, image_depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, image_width, image_height, image_depth, 0, image_component, GL_UNSIGNED_BYTE, image);
 }
 
-void VolumeTexture::readFromFile(const char* file_name)
+bool VolumeTexture::readFromFile(const char* file_name)
 {
   char* extension = strrchr(file_name, '.');
   int is_pvm = !(strcmp(extension, "pvm"));
 
   if(!is_pvm) {
     printf("Cannot read file. Must be PVM file.\n");
-    exit(1);
+    return false;
   }
  
-  image = readVolumeData(file_name);
+  return readVolumeData(file_name);
 }
 
 void VolumeTexture::createTestTexture(void)
@@ -269,7 +279,7 @@ void VolumeTexture::createTestTexture(void)
 	delete []data;
 }
 
-GLubyte* VolumeTexture::readVolumeData(const char* file_name)
+bool VolumeTexture::readVolumeData(const char* file_name)
 {
   unsigned char* volume;
   unsigned int width, height, depth, components;
@@ -280,12 +290,16 @@ GLubyte* VolumeTexture::readVolumeData(const char* file_name)
   if(!volume)
     {
       printf("OOPS! %s could not be found or read.\n", file_name);
-      return NULL;
+      return false;
     } 
-  else 
-    {
-      return static_cast<GLubyte*>(volume);
-    }
+  
+  // Set volume.
+  image_width = width;
+  image_height = height;
+  image_depth = depth;
+  image_component = components;
+  image = static_cast<GLubyte*>(volume);
+  return true;
 }
 
 void VolumeTexture::freeImage(void)

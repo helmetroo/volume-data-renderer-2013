@@ -133,11 +133,11 @@ public:
 	return result;
       }
   };
-  VolumeTexture() : Texture() {}
+  VolumeTexture();
   virtual void enableCapability(void);
   virtual void disableCapability(void);
 
-  void readFromFile(const char* file_name);
+  bool readFromFile(const char* file_name);
   void createTestTexture(void);
 
   virtual void buildMipmaps(void);
@@ -152,10 +152,11 @@ public:
   virtual void bind(void);
 
 protected:
-  int image_width, image_height, image_depth;
+  unsigned int image_width, image_height, image_depth;
+  unsigned int image_component;
   GLubyte* image;
 
-  unsigned char* readVolumeData(const char* file_name);
+  bool readVolumeData(const char* file_name);
 };
 
 #endif

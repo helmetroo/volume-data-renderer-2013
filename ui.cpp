@@ -53,6 +53,11 @@ void UI::buildInterface(void)
   bounding_box_zoomer = glui->add_translation_to_panel(transform_panel, "Zoom", GLUI_TRANSLATION_Y, scene->getCamera()->zRef());
   bounding_box_rotater = glui->add_rotation_to_panel(transform_panel, "Rotation", scene->getBoundingBox()->rotationMatrix());
 
+  // File browser
+  file_browser_rollout = glui->add_rollout("Files");
+  file_browser_panel = glui->add_panel_to_panel(file_browser_rollout, "", GLUI_PANEL_NONE);
+  file_browser = new GLUI_FileBrowser(file_browser_panel, "", GLUI_PANEL_NONE, 1, file_handle_callback);
+
   // Bind interface to window
   glui->set_main_gfx_window(main_window);
 }
@@ -151,6 +156,12 @@ void UI::onKeyDown(unsigned char key, int x, int y)
 
   glui->sync_live(); 
   glutPostRedisplay();
+}
+
+void UI::onChooseFile(int control)
+{
+  printf("Called!\n");
+  scene->changeVolumeFromFileName(file_browser->get_file());
 }
 
 void UI::onClose(void)

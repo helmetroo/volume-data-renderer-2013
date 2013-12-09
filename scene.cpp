@@ -58,6 +58,18 @@ Scene::~Scene()
   delete full_quad;
 }
 
+void Scene::changeVolumeFromFileName(const char* name)
+{
+  bool read_correctly = volume_texture->readFromFile(name);
+
+  if(read_correctly) {
+    volume_texture->createOnGpu();
+    volume_texture->setWrapping();
+    volume_texture->setFilter();
+    volume_texture->passToGpu();
+  }
+}
+
 void Scene::renderBoundingBox(void)
 {
   ShaderSystem::useShader(ShaderSystem::PASSTHROUGH);

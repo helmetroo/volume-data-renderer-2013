@@ -46,6 +46,11 @@ inline void callKeyboardPress(unsigned char key, int x, int y)
   ui->onKeyDown(key, x, y);
 }
 
+inline void callFileHandle(int control)
+{
+  ui->onChooseFile(control);
+}
+
 int main(int argc, char** argv)
 {
   ui = new UI(768, 512);
@@ -61,6 +66,7 @@ int main(int argc, char** argv)
   ui->bindIdleFunction(callUpdate);
   ui->bindMouseClickFunction(callMouseClick);
   ui->bindMouseMoveFunction(callMouseMove);
+  ui->bindFileHandleFunction(callFileHandle);
 
   ui->initShaderSystem();
   ui->initGlCapabilities();
