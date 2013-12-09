@@ -4,7 +4,6 @@ Scene::Scene(GLuint view_width,
 	     GLuint view_height) : width(view_width),	    
 				   height(view_height)
 {
-  initObjects();
 }
 
 void Scene::initObjects(void)

@@ -6,241 +6,69 @@
  * as appropriate.
  */
 
-#ifdef __APPLE__
-#include "OpenGL/gl.h"
-#include "OpenGL/glu.h"
-#include "GLUT/glut.h"
-#include <GLUI/glui.h>
-#else
-#include "GL/glui.h"
-#include "GL/glut.h"
-#endif
+#include "ui.hpp"
 
-#include "scene.hpp"
-#include "shader.hpp"
-#include "matrixstack.hpp"
 
-// The scene
-Scene* scene;
+UI* ui;
 
-// Matrix stack
-MatrixStack* matrixStack;
-
-// Program break-in
-int main(int argc, char **argv);
-
-// UI components
-GLUI* glui;
-GLUI_Rollout* shadow_choice_rollout;
-GLUI_Rollout* light_position_rollout;
-GLUI_Panel* light_transform_panel;
-GLUI_Translation* light_xz_trans;
-GLUI_Translation* light_y_trans;
-int main_window;
-
-// Shader system
-ShaderSystem* shaderSystem;
-
-// Display / animation callbacks
-void display();
-void update(void);
-
-// Event callbacks
-void onKeyDown(unsigned char key, int x, int y);
-void onWindowResize(int w, int h);
-void onMouseClick(int button, int state, int x, int y);
-void onMouseMove(int x, int y);
-
-// Interactivity for controlling camera and shading type
-void toggleShading(unsigned char which);
-
-// Correctly scales all objects when the window is resized.
-void onWindowResize(int w, int h)
+inline void callOnClose(void)
 {
-  int tx, ty = 0;
-  GLUI_Master.get_viewport_area(&tx, &ty, &w, &h);
-
-  glViewport(0, 0, w, h);
-  glMatrixMode(GL_PROJECTION); MatrixStack::matrixMode(MatrixStack::PROJECTION);
-  glLoadIdentity(); MatrixStack::loadIdentity();
-
-  // We are rendering just two triangles, so no fancy projection.
-  glOrtho(0, w, h, 0, -1, 1);
-  MatrixStack::ortho(w, h);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::VIEW);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
-
-  glutPostRedisplay();
+  ui->onClose();
 }
 
-void onWindowPerspResize(int w, int h)
+inline void callDisplay(void)
 {
-  int tx, ty = 0;
-  GLUI_Master.get_viewport_area(&tx, &ty, &w, &h);
-
-  glViewport(0, 0, w, h);
-  glMatrixMode(GL_PROJECTION); MatrixStack::matrixMode(MatrixStack::PROJECTION);
-  glLoadIdentity(); MatrixStack::loadIdentity();
-
-  // We are rendering just two triangles, so no fancy projection.
-  gluPerspective(45.0f, (GLfloat)w/(GLfloat)h, 0.01f, 400.0f);
-  MatrixStack::perspective(45.0f, (GLfloat)w/(GLfloat)h, 0.01f, 400.0f);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::VIEW);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
-
-  glutPostRedisplay();
+  ui->display();
 }
 
-void display()
+inline void callUpdate(void)
 {
-  // Init display for rendering
-  onWindowPerspResize(scene->getWidth(), scene->getHeight());
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- 
-  // Start working in world space.
-  glMatrixMode(GL_MODELVIEW); 
-  glLoadIdentity(); 
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::VIEW);
-  MatrixStack::loadIdentity();
-
-  MatrixStack::matrixMode(MatrixStack::WORLD);
-
-  // Draw elements.
-  scene->renderBoundingBox();
-  scene->raycast();
-
-  // Draw full screen quad to output final image.
-  onWindowResize(scene->getWidth(), scene->getHeight());
-  scene->outputFinalImage();
-  
-  // Bind transformation / projection matrices.
-  MatrixStack::bindWorldMatrix();
-  MatrixStack::bindViewMatrix();
-  MatrixStack::bindProjectionMatrix();
-  MatrixStack::bindTextureMatrix();
-
-  // Swap buffers
-  glutSwapBuffers();
+  ui->update();
 }
 
-// Drives all animations.
-void update(void)
+inline void callMouseMove(int x, int y)
 {
-  // Bind to window context.
-  if(glutGetWindow() != main_window)
-    glutSetWindow(main_window);
-
-  glutPostRedisplay();
+  ui->onMouseMove(x, y);
 }
 
-// Catches mouse up/down events.
-void onMouseClick(int button, int state, int x, int y)
+inline void callMouseClick(int button, int state, int x, int y)
 {
-  scene->getCamera()->updateMouseState(button, state, x, y);
-  glutPostRedisplay();
+  ui->onMouseClick(button, state, x, y);
 }
 
-// Catches mouse move events.
-// Implements the trackball.
-void onMouseMove(int x, int y)
+inline void callReshape(int w, int h)
 {
-  scene->getCamera()->updateRotation(x, y);
-  glutPostRedisplay();
+  ui->onWindowPerspResize(w, h);
 }
 
-// Handles interactions when the keyboard is pressed
-void onKeyDown(unsigned char key, int x, int y)
+inline void callKeyboardPress(unsigned char key, int x, int y)
 {
-  switch(key)
-    {
-    case 27:
-      exit(0);
-    }
-
-  glui->sync_live(); 
-  glutPostRedisplay();
+  ui->onKeyDown(key, x, y);
 }
 
-void onClose(void)
+int main(int argc, char** argv)
 {
-  delete shaderSystem;
-  delete scene;
-}
+  ui = new UI(768, 512);
 
-void initInterface() 
-{
-  // Create interface
-  glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_RIGHT);
+  // Init glut
+  ui->initGlut(argc, argv);
 
-  // Quit
-  glui->add_button("Quit", 0, (GLUI_Update_CB)exit);
+  // Function binding
+  ui->bindReshapeFunction(callReshape);
+  ui->bindKeyPressFunction(callKeyboardPress);
+  ui->bindDisplayFunction(callDisplay);
+  ui->bindExitFunction(callOnClose);
+  ui->bindIdleFunction(callUpdate);
+  ui->bindMouseClickFunction(callMouseClick);
+  ui->bindMouseMoveFunction(callMouseMove);
 
-  // Bind interface to window
-  glui->set_main_gfx_window(main_window);
-}
-
-int main(int argc, char **argv)
-{
-  // Matrix stack
-  matrixStack = new MatrixStack;
-
-  // Init GLUT with GLUI
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_MULTISAMPLE);
-  glutInitWindowSize(768, 512);
-  main_window = glutCreateWindow("VolRay");
-  GLUI_Master.set_glutReshapeFunc(onWindowPerspResize);
-  GLUI_Master.set_glutKeyboardFunc(onKeyDown);
-  glutDisplayFunc(display);
-  atexit(onClose);
-
-  // Point event handlers to our own methods
-  GLUI_Master.set_glutIdleFunc(update);
-  GLUI_Master.set_glutMouseFunc(onMouseClick);
-  glutMotionFunc(onMouseMove);
-
-  // Load shader programs and our texture.
-  shaderSystem = ShaderSystem::getInstance();
-  shaderSystem->initShader("passthrough.vs", "passthrough.fs", ShaderSystem::PASSTHROUGH);
-  shaderSystem->initShader("raycasting.vs", "raycasting.fs", ShaderSystem::RAYCASTING);
-  shaderSystem->initShader("fullscrtexture.vs", "fullscrtexture.fs", ShaderSystem::OUTPUT);
-
-  // Scene
-  scene = new Scene(768, 512);
-
-  // Enable specific capabilities
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_CULL_FACE);
-  glShadeModel(GL_SMOOTH);
-  
-  // "Background"
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  
-  // UI
-  initInterface();
+  ui->initShaderSystem();
+  ui->initGlCapabilities();
+  ui->setBackground();
+  ui->initSceneObjects();
+  ui->buildInterface();
 
   // Go!
-  glutMainLoop();
+  ui->run();
   return 0;
 }

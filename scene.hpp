@@ -20,7 +20,6 @@ public:
   ~Scene();
 
   void initObjects(void);
-  void initShaderVars(void);
   void renderBoundingBox(void);
   void raycast(void);
   void outputFinalImage(void);
