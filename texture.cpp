@@ -191,7 +191,7 @@ void VolumeTexture::passToGpu(void)
 
 bool VolumeTexture::readFromFile(const char* file_name)
 {
-  char* extension = strrchr(file_name, '.');
+  char* extension = strrchr(const_cast<char*>(file_name), '.');
   int is_pvm = !(strcmp(extension, "pvm"));
 
   if(!is_pvm) {
