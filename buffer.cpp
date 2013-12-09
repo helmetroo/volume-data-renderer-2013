@@ -44,7 +44,7 @@ void OutputBuffer::attachRenderBufferToFrameBuffer(void)
 void OutputBuffer::attachFrameBufferToTexture(Texture* texture)
 {
   // Attach texture to this new buffer.
-  // Apple machines have this method as an extension, but none of the constants need EXT??
+  // Apple machines have this method as an extension
 #ifdef __APPLE__
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->textureID(), 0);
 #else

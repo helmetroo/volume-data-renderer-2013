@@ -38,7 +38,6 @@ public:
   void draw(void);
 
 private:
-  GLuint textureObj[NUM_FACES]; 
   GLfloat* vertices;
   GLuint* indices;
 

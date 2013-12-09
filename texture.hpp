@@ -17,11 +17,15 @@
 #include "GL/glut.h"
 #endif
 
+#include <string.h>
 #include <math.h>
 
 #include "tga.hpp"
 #include "matrixstack.hpp"
 #include "shader.hpp"
+
+#include "codebase.hpp"
+#include "ddsbase.hpp"
 
 class Texture
 {
@@ -134,7 +138,7 @@ public:
   virtual void enableCapability(void);
   virtual void disableCapability(void);
 
-  void readFromFile(const char* name);
+  void readFromFile(const char* file_name);
   void createTestTexture(void);
 
   virtual void buildMipmaps(void);
@@ -148,9 +152,11 @@ public:
 
   virtual void bind(void);
 
-private:
+protected:
   int image_width, image_height, image_depth;
   GLubyte* image;
+
+  unsigned char* readVolumeData(const char* file_name);
 };
 
 #endif

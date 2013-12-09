@@ -22,7 +22,7 @@ ShaderSystem::ShaderSystem()
 
 ShaderSystem::~ShaderSystem()
 {
-  delete instance;
+  //delete instance;
 }
 
 // Reads a shader file and returns a pointer to the

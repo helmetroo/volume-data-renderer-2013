@@ -119,7 +119,11 @@ void BufferTexture::buildMipmaps(void)
 
 void BufferTexture::passToGpu(void)
 {
+#ifdef __APPLE__
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F_ARB, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+#else
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+#endif
 }
 
 void BufferTexture::freeImage(void)
@@ -175,8 +179,17 @@ void VolumeTexture::passToGpu(void)
   glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, image_width, image_height, image_depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 }
 
-void VolumeTexture::readFromFile(const char* name)
+void VolumeTexture::readFromFile(const char* file_name)
 {
+  char* extension = strrchr(file_name, '.');
+  int is_pvm = !(strcmp(extension, "pvm"));
+
+  if(!is_pvm) {
+    printf("Cannot read file. Must be PVM file.\n");
+    exit(1);
+  }
+ 
+  image = readVolumeData(file_name);
 }
 
 void VolumeTexture::createTestTexture(void)
@@ -254,6 +267,25 @@ void VolumeTexture::createTestTexture(void)
 	glTexImage3D(GL_TEXTURE_3D, 0,GL_RGBA, VOLUME_TEX_SIZE, VOLUME_TEX_SIZE,VOLUME_TEX_SIZE,0, GL_RGBA, GL_UNSIGNED_BYTE,data);
 
 	delete []data;
+}
+
+GLubyte* VolumeTexture::readVolumeData(const char* file_name)
+{
+  unsigned char* volume;
+  unsigned int width, height, depth, components;
+  float scale_x, scale_y, scale_z;
+
+  volume = readPVMvolume(const_cast<char*>(file_name), &width, &height, &depth, &components, &scale_x, &scale_y, &scale_z);
+
+  if(!volume)
+    {
+      printf("OOPS! %s could not be found or read.\n", file_name);
+      return NULL;
+    } 
+  else 
+    {
+      return static_cast<GLubyte*>(volume);
+    }
 }
 
 void VolumeTexture::freeImage(void)
