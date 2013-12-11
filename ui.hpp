@@ -94,6 +94,8 @@ public:
   void onMouseMove(int x, int y);
   void onChooseFile(int control);
 
+  inline Scene* getScene(void) { return scene; }
+
   inline void setBackground(float r, float g, float b, float a)
   {
     glClearColor(r, g, b, a);

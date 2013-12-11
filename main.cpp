@@ -74,6 +74,12 @@ int main(int argc, char** argv)
   ui->initSceneObjects();
   ui->buildInterface();
 
+  // Initial boot with this file
+  if(argc == 2) {
+    ui->getScene()->changeVolumeFromFileName(argv[1]);
+  }
+
+
   // Go!
   ui->run();
   return 0;

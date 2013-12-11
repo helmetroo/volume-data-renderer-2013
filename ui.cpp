@@ -160,7 +160,6 @@ void UI::onKeyDown(unsigned char key, int x, int y)
 
 void UI::onChooseFile(int control)
 {
-  printf("Called!\n");
   scene->changeVolumeFromFileName(file_browser->get_file());
 }
 

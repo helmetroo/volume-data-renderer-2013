@@ -161,13 +161,14 @@ void VolumeTexture::createOnGpu(void)
 {
   glGenTextures(1, &texture_id);
   glBindTexture(GL_TEXTURE_3D, texture_id);
+  //  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
 void VolumeTexture::setWrapping(void)
 {
-  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 }
 
 void VolumeTexture::setFilter(void)
@@ -186,16 +187,16 @@ void VolumeTexture::buildMipmaps(void)
 
 void VolumeTexture::passToGpu(void)
 {
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, image_width, image_height, image_depth, 0, image_component, GL_UNSIGNED_BYTE, image);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, image_width, image_height, image_depth, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, image);
 }
 
 bool VolumeTexture::readFromFile(const char* file_name)
 {
   char* extension = strrchr(const_cast<char*>(file_name), '.');
-  int is_pvm = !(strcmp(extension, "pvm"));
+  int is_pvm = !(strcmp(extension, ".pvm"));
 
   if(!is_pvm) {
-    printf("Cannot read file. Must be PVM file.\n");
+    printf("Cannot read file. Please check to make sure it has the extension '.pvm' at the end.\n");
     return false;
   }
  
@@ -281,24 +282,26 @@ void VolumeTexture::createTestTexture(void)
 
 bool VolumeTexture::readVolumeData(const char* file_name)
 {
-  unsigned char* volume;
+  unsigned char* new_volume;
   unsigned int width, height, depth, components;
   float scale_x, scale_y, scale_z;
 
-  volume = readPVMvolume(const_cast<char*>(file_name), &width, &height, &depth, &components, &scale_x, &scale_y, &scale_z);
+  new_volume = readPVMvolume(const_cast<char*>(file_name), &width, &height, &depth, &components, &scale_x, &scale_y, &scale_z);
 
-  if(!volume)
+  if(!new_volume)
     {
       printf("OOPS! %s could not be found or read.\n", file_name);
       return false;
     } 
-  
+
   // Set volume.
+  printf("Image dimensions: %d x %d x %d\n", width, height, depth);
+  printf("Image components: %d\n", components);
   image_width = width;
   image_height = height;
   image_depth = depth;
   image_component = components;
-  image = static_cast<GLubyte*>(volume);
+  image = new_volume;
   return true;
 }
 

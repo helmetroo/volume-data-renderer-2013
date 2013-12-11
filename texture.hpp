@@ -154,7 +154,7 @@ public:
 protected:
   unsigned int image_width, image_height, image_depth;
   unsigned int image_component;
-  GLubyte* image;
+  unsigned char* image;
 
   bool readVolumeData(const char* file_name);
 };

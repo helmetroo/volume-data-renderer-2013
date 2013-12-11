@@ -35,7 +35,6 @@ void Scene::initObjects(void)
 
   // The volume texture
   volume_texture = new VolumeTexture;
-  volume_texture->createTestTexture();
   
   // Create render buffer to create necessary render step for framebuffer
   render_buffer->createRenderBuffer();
