@@ -20,7 +20,8 @@ public:
   void initObjects(void);
 
   // Raycasting steps
-  void renderBoundingBox(void);
+  void renderBoundingBoxFront(void);
+  void renderBoundingBoxBack(void);
   void raycast(void);
   void outputFinalImage(void);
 

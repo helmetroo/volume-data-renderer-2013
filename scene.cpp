@@ -17,6 +17,7 @@ void Scene::initObjects(void)
   render_buffer = new OutputBuffer(width, height);
   render_buffer->createFrameBuffer();
 
+  frontface_texture = new BufferTexture(width, height);
   backface_texture = new BufferTexture(width, height);
   output_texture = new BufferTexture(width, height);
   
@@ -70,7 +71,7 @@ void Scene::changeVolumeFromFileName(const char* name)
   }
 }
 
-void Scene::renderBoundingBox(void)
+void Scene::renderBoundingBoxBack(void)
 {
   ShaderSystem::useShader(ShaderSystem::PASSTHROUGH);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -88,6 +89,15 @@ void Scene::renderBoundingBox(void)
   bounding_box->draw();
 }
 
+void Scene::renderBoundingBoxFront(void)
+{
+  render_buffer->attachFrameBufferToTexture(frontface_texture);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glCullFace(GL_BACK);
+  bounding_box->draw();
+}
+
 void Scene::raycast(void)
 {
   // Here subtract frontface colors from backface colors
@@ -100,6 +110,7 @@ void Scene::raycast(void)
   // Also render the volume texture for sampling.
   
   // Render front faces normally.
+  //frontface_texture->beginRender("frontBoundingVol");
   backface_texture->beginRender("backBoundingVol");
   volume_texture->beginRender("volumeTexture");
   glCullFace(GL_BACK);

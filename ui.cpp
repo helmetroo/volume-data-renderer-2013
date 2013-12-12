@@ -110,7 +110,8 @@ void UI::display(void)
   glLoadIdentity(); 
 
   // Draw elements.
-  scene->renderBoundingBox();
+  scene->renderBoundingBoxBack();
+  //scene->renderBoundingBoxFront();
   scene->raycast();
 
   // Draw full screen quad to output final image.
