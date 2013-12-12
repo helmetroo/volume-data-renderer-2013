@@ -32,6 +32,7 @@ void main()
   // clipspace coordinates to normalized-device coords needed to index texture properly.
   vec2 buffer_tex_coords = (out_position.xy/out_position.w + 1.0) / 2.0;
   vec3 origin = box_tex_coords;
+  vec4 front_face_color  = texture2D(frontBoundingVol, buffer_tex_coords);
   vec4 destination = texture2D(backBoundingVol, buffer_tex_coords);
   
   // Compute direction
