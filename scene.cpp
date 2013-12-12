@@ -110,7 +110,7 @@ void Scene::raycast(void)
   // Also render the volume texture for sampling.
   
   // Render front faces normally.
-  //frontface_texture->beginRender("frontBoundingVol");
+  frontface_texture->beginRender("frontBoundingVol");
   backface_texture->beginRender("backBoundingVol");
   volume_texture->beginRender("volumeTexture");
   glCullFace(GL_BACK);

@@ -111,7 +111,7 @@ void UI::display(void)
 
   // Draw elements.
   scene->renderBoundingBoxBack();
-  //scene->renderBoundingBoxFront();
+  scene->renderBoundingBoxFront();
   scene->raycast();
 
   // Draw full screen quad to output final image.

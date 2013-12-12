@@ -24,7 +24,7 @@ void main()
   // TODO change to uniform from app
   // Step size SHOULD NOT be very small or too big either.
   const float step_size = 0.35;
-  const float intensity = 0.5;
+  const float intensity = 0.8;
   const int marches = 512;
 
   // Calculate ray direction (back to front).
@@ -32,12 +32,13 @@ void main()
   // clipspace coordinates to normalized-device coords needed to index texture properly.
   vec2 buffer_tex_coords = (out_position.xy/out_position.w + 1.0) / 2.0;
   vec3 origin = box_tex_coords;
-  vec4 front_face_color  = texture2D(frontBoundingVol, buffer_tex_coords);
+  vec4 face_origin = texture2D(frontBoundingVol, buffer_tex_coords);
   vec4 destination = texture2D(backBoundingVol, buffer_tex_coords);
   
   // Compute direction
-  vec3 ray_direction = normalize(origin - destination.xyz);
-  vec3 rayDelta = step_size * ray_direction;
+  vec3 ray_direction = origin - destination.xyz;
+  vec3 norm_ray_direction = normalize(ray_direction);
+  vec3 rayDelta = step_size * norm_ray_direction;
 
   // Begin ray at origin, distance computation
   vec3 ray = destination.xyz;
