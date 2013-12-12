@@ -8,7 +8,6 @@
 
 #include "ui.hpp"
 
-
 UI* ui;
 
 inline void callOnClose(void)
@@ -53,7 +52,7 @@ inline void callFileHandle(int control)
 
 int main(int argc, char** argv)
 {
-  ui = new UI(768, 512);
+  ui = new UI(1024, 512);
 
   // Init glut
   ui->initGlut(argc, argv);
@@ -74,11 +73,9 @@ int main(int argc, char** argv)
   ui->initSceneObjects();
   ui->buildInterface();
 
-  // Initial boot with this file
-  if(argc == 2) {
+  // Initial boot with a file passed in
+  if(argc == 2)
     ui->getScene()->changeVolumeFromFileName(argv[1]);
-  }
-
 
   // Go!
   ui->run();

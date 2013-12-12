@@ -48,6 +48,7 @@ Scene::~Scene()
   delete camera;
 
   delete backface_texture;
+  delete frontface_texture;
   delete output_texture;
   delete bounding_box;
   delete render_buffer;
@@ -97,6 +98,8 @@ void Scene::raycast(void)
 
   // Render the back faces to a texture the raymarcher can use.
   // Also render the volume texture for sampling.
+  
+  // Render front faces normally.
   backface_texture->beginRender("backBoundingVol");
   volume_texture->beginRender("volumeTexture");
   glCullFace(GL_BACK);
@@ -114,6 +117,6 @@ void Scene::outputFinalImage(void)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
 
-  backface_texture->beginRender("outputVolume");
+  volume_texture->beginRender("outputVolume");
   full_quad->render();
 }

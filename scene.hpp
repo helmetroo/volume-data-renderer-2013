@@ -45,10 +45,11 @@ private:
   // Buffer
   OutputBuffer* render_buffer;
   BufferTexture* backface_texture;
+  BufferTexture* frontface_texture;
   BufferTexture* output_texture;
   GLuint width, height;
 
-  // Full-screen quad
+  // Full-screen quad to render final results
   FullQuad* full_quad;
 };
 
