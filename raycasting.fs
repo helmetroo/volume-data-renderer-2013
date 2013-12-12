@@ -9,7 +9,7 @@
 
 uniform sampler2D back_bounding_volume;
 
-uniform sampler3D volume_texture;
+uniform sampler3D outputVolume;
 
 varying vec4 out_position;
 varying vec3 box_tex_coords;
@@ -22,9 +22,9 @@ void main()
 {
   // TODO change to uniform from app
   // Step size SHOULD NOT be very small or too big either.
-  const float step_size = 0.25;
+  const float step_size = 0.1;
   const float intensity = 0.5;
-  const int marches = 512;
+  const int marches = 1024;
 
   // Calculate ray direction (back to front).
   // Indexing backfaces texture requires a conversion of
@@ -34,8 +34,9 @@ void main()
   vec4 destination = texture2D(back_bounding_volume, buffer_tex_coords);
   
   // Compute direction
-  vec3 ray_direction = normalize(origin - destination.xyz);
-  vec3 rayDelta = step_size * ray_direction;
+  vec3 ray_direction = origin - destination.xyz;
+  vec3 norm_ray_direction = normalize(ray_direction);
+  vec3 rayDelta = step_size * norm_ray_direction;
 
   // Begin ray at origin
   vec3 ray = destination.xyz;
@@ -49,7 +50,7 @@ void main()
   for(int march = 0; march < marches; ++march)
     {
       // March the delta amount along the ray
-      vec4 sample_color = texture3D(volume_texture, ray);
+      vec4 sample_color = texture3D(outputVolume, ray);
       float sample_alpha = sample_color.a*step_size;
 
       // Back to front color blending to output color at a pixel
@@ -61,7 +62,7 @@ void main()
       len_acc += delta_len;
 
       // A stopping criterion
-      if(sample_alpha > 1.0) {
+      if(sample_alpha > 1.0 || len_acc >= len) {
 	break;
       }
     }
