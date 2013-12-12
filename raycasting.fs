@@ -22,8 +22,8 @@ void main()
 {
   // TODO change to uniform from app
   // Step size SHOULD NOT be very small or too big either.
-  const float step_size = 0.2;
-  const float intensity = 3.0;
+  const float step_size = 0.25;
+  const float intensity = 0.5;
   const int marches = 512;
 
   // Calculate ray direction (back to front).
@@ -39,7 +39,6 @@ void main()
 
   // Begin ray at origin
   vec3 ray = destination.xyz;
-
   float len = length(ray_direction);
   float delta_len = length(rayDelta);
   float len_acc = 0.0;
@@ -54,9 +53,8 @@ void main()
       float sample_alpha = sample_color.a*step_size;
 
       // Back to front color blending to output color at a pixel
-      final_color += (1.0 - final_alpha)*sample_color*sample_alpha*intensity;
-final_color.a = sample_alpha;
-      final_alpha += sample_alpha;
+      final_color += (1.0 - final_alpha)*final_color + sample_color*sample_alpha;
+      final_color *= intensity;
 
       // Move to next position
       ray += rayDelta;
