@@ -110,10 +110,12 @@ void UI::display(void)
   glLoadIdentity(); 
 
   // Draw elements.
-  scene->renderBoundingBox();
+  scene->renderBoundingBoxBack();
+  scene->renderBoundingBoxFront();
   scene->raycast();
 
-  // Draw full screen quad to output final image.
+  // Draw full screen quad to output final image by
+  // applying orthographic projection mode.
   onWindowResize(scene->getWidth(), scene->getHeight());
   scene->outputFinalImage();
   

@@ -20,7 +20,8 @@ public:
   void initObjects(void);
 
   // Raycasting steps
-  void renderBoundingBox(void);
+  void renderBoundingBoxFront(void);
+  void renderBoundingBoxBack(void);
   void raycast(void);
   void outputFinalImage(void);
 
@@ -47,7 +48,7 @@ private:
   BufferTexture* backface_texture;
   BufferTexture* frontface_texture;
   BufferTexture* output_texture;
-  GLuint width, height;
+  int width, height;
 
   // Full-screen quad to render final results
   FullQuad* full_quad;

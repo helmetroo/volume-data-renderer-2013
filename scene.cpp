@@ -17,15 +17,21 @@ void Scene::initObjects(void)
   render_buffer = new OutputBuffer(width, height);
   render_buffer->createFrameBuffer();
 
+  frontface_texture = new BufferTexture(width, height);
   backface_texture = new BufferTexture(width, height);
   output_texture = new BufferTexture(width, height);
+
+  // Prep frontface render texture
+  frontface_texture->createOnGpu();
+  frontface_texture->setWrapping();
+  frontface_texture->setFilter();
+  frontface_texture->passToGpu();
   
   // Prep backface render texture
   backface_texture->createOnGpu();
   backface_texture->setWrapping();
   backface_texture->setFilter();
   backface_texture->passToGpu();
-  render_buffer->attachFrameBufferToTexture(backface_texture);
 
   // Prep output volume image texture
   output_texture->createOnGpu();
@@ -70,11 +76,9 @@ void Scene::changeVolumeFromFileName(const char* name)
   }
 }
 
-void Scene::renderBoundingBox(void)
+void Scene::renderBoundingBoxBack(void)
 {
   ShaderSystem::useShader(ShaderSystem::PASSTHROUGH);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   // Camera transforms.
   camera->aim();
 
@@ -83,9 +87,27 @@ void Scene::renderBoundingBox(void)
   render_buffer->bindRenderBuffer();
 
   render_buffer->attachFrameBufferToTexture(backface_texture);
+  render_buffer->initViewport();
 
+  // Output bounding box back faces to the buffer.
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
   bounding_box->draw();
+  glDisable(GL_CULL_FACE);
+}
+
+void Scene::renderBoundingBoxFront(void)
+{
+  render_buffer->attachFrameBufferToTexture(frontface_texture);
+  render_buffer->initViewport();
+
+  // Output bounding box front faces to the buffer.
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  bounding_box->draw();
+  glDisable(GL_CULL_FACE);
 }
 
 void Scene::raycast(void)
@@ -93,17 +115,18 @@ void Scene::raycast(void)
   // Here subtract frontface colors from backface colors
   // which gives ray direction, which we do in the raymarcher.
   ShaderSystem::useShader(ShaderSystem::RAYCASTING);
-  render_buffer->attachFrameBufferToTexture(output_texture);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // Render the back faces to a texture the raymarcher can use.
-  // Also render the volume texture for sampling.
-  
-  // Render front faces normally.
+  frontface_texture->beginRender("frontBoundingVol");
   backface_texture->beginRender("backBoundingVol");
-  volume_texture->beginRender("volumeTexture");
+  volume_texture->beginRender("outputVoluem");
+
+  // Render front faces normally.
+  render_buffer->attachFrameBufferToTexture(output_texture);
+  render_buffer->initViewport();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   bounding_box->draw();
+  glDisable(GL_CULL_FACE);
 
   // Stop rendering to the buffer. Can now use it as output.
   render_buffer->unbindFrameBuffer();
@@ -117,6 +140,6 @@ void Scene::outputFinalImage(void)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
 
-  volume_texture->beginRender("outputVolume");
+  output_texture->beginRender("output_volume");
   full_quad->render();
 }

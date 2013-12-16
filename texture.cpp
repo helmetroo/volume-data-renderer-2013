@@ -1,6 +1,6 @@
 #include "texture.hpp"
 
-GLuint Texture::texture_unit = 2;
+GLuint Texture::texture_unit = -1;
 
 Texture::Texture()
 {

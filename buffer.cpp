@@ -37,7 +37,7 @@ void OutputBuffer::declareBufferStorage(void)
 
 void OutputBuffer::attachRenderBufferToFrameBuffer(void)
 {
-  // Allow
+  // Attach a render buffer to an existing frame buffer.
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, render_buffer_ptr);
 }
 
@@ -50,6 +50,9 @@ void OutputBuffer::attachFrameBufferToTexture(Texture* texture)
 #else
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->textureID(), 0);
 #endif
+
+    //GLenum buffers[1] = { GL_COLOR_ATTACHMENT0 };
+    //glDrawBuffers(1, buffers);
 }
 
 void OutputBuffer::disableDraw(void)
