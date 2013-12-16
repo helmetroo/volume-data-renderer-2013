@@ -37,16 +37,16 @@ void main()
   
   // Compute direction
   //vec3 ray_direction = origin - destination.xyz;
-  //vec3 ray_direction = destination.xyz - face_origin.xyz;
-  vec3 ray_direction = finish.xyz - face_origin.xyz;
+  vec3 ray_direction = destination.xyz - face_origin.xyz;
+  //vec3 ray_direction = finish.xyz - face_origin.xyz;
   vec3 norm_ray_direction = normalize(ray_direction);
   vec3 rayDelta = step_size * norm_ray_direction;
 
   // Begin ray at origin, distance computation
   vec3 ray = face_origin.xyz;
-  float len = length(ray_direction);
-  float delta_len = length(rayDelta);
-  float len_acc = 0.0;
+  float ray_length = length(ray_direction);
+  float delta_length = length(rayDelta);
+  float current_length_acc = 0.0;
 
   // Begin marching
   vec4 final_color = vec4(1.0);
@@ -69,10 +69,10 @@ void main()
 
       // Move to next position
       ray += rayDelta;
-      len_acc += delta_len;
+      current_length_acc += delta_length;
 
       // A stopping criterion (non-isovalue)
-      if(sample_alpha > 1.0 || len_acc > len) {
+      if(sample_alpha > 1.0 || current_length_acc > ray_length) {
 	break;
       }
     }

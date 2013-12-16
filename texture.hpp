@@ -57,7 +57,7 @@ public:
   void transform(void);
 
   inline GLuint textureID(void) { return texture_id; }
-  inline static GLuint textureUnit(void) { return texture_unit; }
+  inline GLuint textureUnit(void) { return texture_unit; }
 
   virtual void buildMipmaps(void) = 0;
   virtual void passToGpu(void) = 0;
@@ -75,7 +75,7 @@ public:
 
 protected:
   GLuint texture_id;
-  static GLuint texture_unit;
+  GLuint texture_unit;
 
   // Transform
   float rot_angle, rot_axis_x, rot_axis_y, rot_axis_z;
@@ -87,8 +87,9 @@ protected:
 class BufferTexture : public Texture
 {
 public:
-  BufferTexture(GLuint _width, GLuint _height) : Texture() 
+  BufferTexture(GLuint _width, GLuint _height, GLuint unit) : Texture() 
   { 
+    texture_unit = unit;
     width = _width;
     height = _height; 
   } 
@@ -115,25 +116,7 @@ private:
 class VolumeTexture : public Texture
 {
 public:
-  struct Vector3
-  {
-    GLfloat x, y, z;
-    
-    Vector3(GLfloat _x, GLfloat _y, GLfloat _z) : x(_x), y(_y), z(_z) {}
-    GLfloat length(void) { return sqrt(x*x + y*y + z*z); }
-      Vector3 operator-(const Vector3& rhs) 
-      {
-	Vector3 result(x - rhs.x, y - rhs.y, z - rhs.z);
-	return result;
-      }
-      
-      Vector3 operator+(const Vector3& rhs) 
-      {
-	Vector3 result(x + rhs.x, y + rhs.y, z + rhs.z);
-	return result;
-      }
-  };
-  VolumeTexture();
+  VolumeTexture(GLuint unit);
   virtual void enableCapability(void);
   virtual void disableCapability(void);
 

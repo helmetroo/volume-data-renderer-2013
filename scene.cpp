@@ -17,9 +17,9 @@ void Scene::initObjects(void)
   render_buffer = new OutputBuffer(width, height);
   render_buffer->createFrameBuffer();
 
-  frontface_texture = new BufferTexture(width, height);
-  backface_texture = new BufferTexture(width, height);
-  output_texture = new BufferTexture(width, height);
+  frontface_texture = new BufferTexture(width, height, 1);
+  backface_texture = new BufferTexture(width, height, 2);
+  output_texture = new BufferTexture(width, height, 3);
 
   // Prep frontface render texture
   frontface_texture->createOnGpu();
@@ -40,7 +40,7 @@ void Scene::initObjects(void)
   output_texture->passToGpu();
 
   // The volume texture
-  volume_texture = new VolumeTexture;
+  volume_texture = new VolumeTexture(4);
   
   // Create render buffer to create necessary render step for framebuffer
   render_buffer->createRenderBuffer();
@@ -117,14 +117,14 @@ void Scene::raycast(void)
   ShaderSystem::useShader(ShaderSystem::RAYCASTING);
   frontface_texture->beginRender("frontBoundingVol");
   backface_texture->beginRender("backBoundingVol");
-  volume_texture->beginRender("outputVoluem");
+  volume_texture->beginRender("outputVolume");
 
   // Render front faces normally.
   render_buffer->attachFrameBufferToTexture(output_texture);
   render_buffer->initViewport();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
+  glCullFace(GL_FRONT);
   bounding_box->draw();
   glDisable(GL_CULL_FACE);
 

@@ -1,11 +1,7 @@
 #include "texture.hpp"
 
-GLuint Texture::texture_unit = -1;
-
 Texture::Texture()
 {
-  ++texture_unit;
-
   setTranslation(0.0f, 0.0f, 0.0f);
   setRotation(0.0f, 0.0f, 0.0f, 1.0f);
   setScale(1.0f, 1.0f, 1.0f);
@@ -131,7 +127,7 @@ void BufferTexture::freeImage(void)
 {
 }
 
-VolumeTexture::VolumeTexture() : Texture() 
+VolumeTexture::VolumeTexture(GLuint unit) : Texture() 
 {
   image_width = 0;
   image_height = 0;
@@ -140,6 +136,7 @@ VolumeTexture::VolumeTexture() : Texture()
   image_component = GL_RGBA;
 
   image = NULL;
+  texture_unit = unit;
 }
 
 void VolumeTexture::enableCapability(void)
