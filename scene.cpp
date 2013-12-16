@@ -124,7 +124,7 @@ void Scene::raycast(void)
   render_buffer->initViewport();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
+  glCullFace(GL_BACK);
   bounding_box->draw();
   glDisable(GL_CULL_FACE);
 
