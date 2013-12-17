@@ -160,7 +160,6 @@ void VolumeTexture::createOnGpu(void)
   glGenTextures(1, &texture_id);
   glBindTexture(GL_TEXTURE_3D, texture_id);
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
 void VolumeTexture::setWrapping(void)
